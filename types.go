@@ -17,37 +17,83 @@
 
 package lvm2
 
+import (
+	"encoding/json"
+	"strconv"
+)
+
+// BoolString is a JSON type that treats "1" as true and "0" as false.
+type BoolString bool
+
+func (b *BoolString) UnmarshalJSON(data []byte) error {
+	var v string
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+
+	switch v {
+	case "1":
+		*b = true
+	default:
+		*b = false
+	}
+
+	return nil
+}
+
+// IntString is a JSON type for strings that are actually integers.
+type IntString int
+
+func (i *IntString) UnmarshalJSON(data []byte) error {
+	var v string
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+
+	if v == "" {
+		*i = 0
+	} else {
+		ival, err := strconv.Atoi(v)
+		if err != nil {
+			return err
+		}
+		*i = IntString(ival)
+	}
+
+	return nil
+}
+
 // PhysicalVolume represents an LVM2 Physical Volume (PV).
 type PhysicalVolume struct {
-	Format                 string `json:"pv_fmt"`            // Type of metadata.
-	UUID                   string `json:"pv_uuid"`           // Unique identifier of the PV.
-	DeviceSize             string `json:"dev_size"`          // Size of the underlying device in current units.
-	Name                   string `json:"pv_name"`           // Name of the PV.
-	Major                  string `json:"pv_major"`          // Device major number.
-	Minor                  string `json:"pv_minor"`          // Device minor number.
-	MetadataFree           string `json:"pv_mda_free"`       // Free metadata area space on this device in current units.
-	MetadataSize           string `json:"pv_mda_size"`       // Size of smallest metadata area on this device in current units.
-	HeaderExtensionVersion string `json:"pv_ext_vsn"`        // PV header extension version.
-	PEStart                string `json:"pe_start"`          // Offset to start of data on the underlying device.
-	Size                   string `json:"pv_size"`           // Size of the physical volume in current units.
-	FreeSpace              string `json:"pv_free"`           // Total unallocated space in current units.
-	UsedSpace              string `json:"pv_used"`           // Total allocated space in current units.
-	Attributes             string `json:"pv_attr"`           // Various attributes of the PV.
-	Allocatable            string `json:"pv_allocatable"`    // Indicates if device can be used for allocation.
-	Exported               string `json:"pv_exported"`       // Indicates if device is exported.
-	Missing                string `json:"pv_missing"`        // Indicates if device is missing in system.
-	PECount                string `json:"pv_pe_count"`       // Total number of Physical Extents.
-	PEAllocCount           string `json:"pv_pe_alloc_count"` // Total number of allocated Physical Extents.
-	Tags                   string `json:"pv_tags"`           // Tags associated with the physical volume, if any.
-	MetadataCount          string `json:"pv_mda_count"`      // Number of metadata areas on this device.
-	MetadataUsedCount      string `json:"pv_mda_used_count"` // Number of metadata areas in use on this device.
-	BootloaderAreaStart    string `json:"pv_ba_start"`       // Offset to start of PV Bootloader Area on device in current units.
-	BootloaderAreaSize     string `json:"pv_ba_size"`        // Size of the PV Bootloader Area in current units.
-	InUse                  string `json:"pv_in_use"`         // Indicates if the physical volume is used.
-	Duplicate              string `json:"pv_duplicate"`      // Indicates if PV is an unchosen duplicate.
-	DeviceID               string `json:"pv_device_id"`      // Device ID such as the WWID.
-	DeviceIDType           string `json:"pv_device_id_type"` // Type of the device ID, such as WWID.
-	VGName                 string `json:"vg_name"`           // Name of the VG the PV belongs to.
+	Format                 string     `json:"pv_fmt"`            // Type of metadata.
+	UUID                   string     `json:"pv_uuid"`           // Unique identifier of the PV.
+	DeviceSize             string     `json:"dev_size"`          // Size of the underlying device in current units.
+	Name                   string     `json:"pv_name"`           // Name of the PV.
+	Major                  IntString  `json:"pv_major"`          // Device major number.
+	Minor                  IntString  `json:"pv_minor"`          // Device minor number.
+	MetadataFree           string     `json:"pv_mda_free"`       // Free metadata area space on this device in current units.
+	MetadataSize           string     `json:"pv_mda_size"`       // Size of smallest metadata area on this device in current units.
+	HeaderExtensionVersion IntString  `json:"pv_ext_vsn"`        // PV header extension version.
+	PEStart                string     `json:"pe_start"`          // Offset to start of data on the underlying device.
+	Size                   string     `json:"pv_size"`           // Size of the physical volume in current units.
+	FreeSpace              string     `json:"pv_free"`           // Total unallocated space in current units.
+	UsedSpace              string     `json:"pv_used"`           // Total allocated space in current units.
+	Attributes             string     `json:"pv_attr"`           // Various attributes of the PV.
+	Allocatable            BoolString `json:"pv_allocatable"`    // Indicates if device can be used for allocation.
+	Exported               BoolString `json:"pv_exported"`       // Indicates if device is exported.
+	Missing                BoolString `json:"pv_missing"`        // Indicates if device is missing in system.
+	ExtentCount            IntString  `json:"pv_pe_count"`       // Total number of Physical Extents.
+	ExtentAllocCount       IntString  `json:"pv_pe_alloc_count"` // Total number of allocated Physical Extents.
+	Tags                   string     `json:"pv_tags"`           // Tags associated with the physical volume, if any.
+	MetadataCount          IntString  `json:"pv_mda_count"`      // Number of metadata areas on this device.
+	MetadataUsedCount      IntString  `json:"pv_mda_used_count"` // Number of metadata areas in use on this device.
+	BootloaderAreaStart    string     `json:"pv_ba_start"`       // Offset to start of PV Bootloader Area on device in current units.
+	BootloaderAreaSize     string     `json:"pv_ba_size"`        // Size of the PV Bootloader Area in current units.
+	InUse                  BoolString `json:"pv_in_use"`         // Indicates if the physical volume is used.
+	Duplicate              BoolString `json:"pv_duplicate"`      // Indicates if PV is an unchosen duplicate.
+	DeviceID               string     `json:"pv_device_id"`      // Device ID such as the WWID.
+	DeviceIDType           string     `json:"pv_device_id_type"` // Type of the device ID, such as WWID.
+	VGName                 string     `json:"vg_name"`           // Name of the VG the PV belongs to.
 }
 
 // ListPVOptions provides options for listing PVs (pvs).
@@ -140,40 +186,40 @@ type ResizePVOptions struct {
 
 // VolumeGroup represents an LVM2 Volume Group (VG).
 type VolumeGroup struct {
-	Format             string `json:"vg_fmt"`               // Type of metadata.
-	UUID               string `json:"vg_uuid"`              // Unique identifier.
-	Name               string `json:"vg_name"`              // Name of the VG.
-	Attributes         string `json:"vg_attr"`              // Various attributes.
-	Permissions        string `json:"vg_permissions"`       // Permissions.
-	Extendable         string `json:"vg_extendable"`        // Set if VG is extendable.
-	Exported           string `json:"vg_exported"`          // Set if VG is exported.
-	AutoActivation     string `json:"vg_autoactivation"`    // Set if VG autoactivation is enabled.
-	Partial            string `json:"vg_partial"`           // Set if VG is partial.
-	AllocationPolicy   string `json:"vg_allocation_policy"` // VG allocation policy.
-	Clustered          string `json:"vg_clustered"`         // Set if VG is clustered.
-	Shared             string `json:"vg_shared"`            // Set if VG is shared.
-	Size               string `json:"vg_size"`              // Total size of VG in current units.
-	Free               string `json:"vg_free"`              // Total amount of free space in current units.
-	SystemID           string `json:"vg_systemid"`          // System ID of the VG indicating which host owns it.
-	LockType           string `json:"vg_lock_type"`         //  Lock type of the VG used by lvmlockd.
-	LockArgs           string `json:"vg_lock_args"`         // Lock args of the VG used by lvmlockd.
-	ExtentSize         string `json:"vg_extent_size"`       // Size of Physical Extents in current units.
-	ExtentCount        string `json:"vg_extent_count"`      // Total number of Physical Extents.
-	FreeCount          string `json:"vg_free_count"`        // Total number of unallocated Physical Extents.
-	MaxLogicalVolumes  string `json:"max_lv"`               // Maximum number of LVs allowed in VG or 0 if unlimited.
-	MaxPhysicalVolumes string `json:"max_pv"`               // Maximum number of PVs allowed in VG or 0 if unlimited.
-	PVCount            string `json:"pv_count"`             // Number of PVs in VG.
-	MissingPVCount     string `json:"vg_missing_pv_count"`  // Number of PVs in VG which are missing.
-	LVCount            string `json:"lv_count"`             // Number of LVs.
-	SnapshotCount      string `json:"snap_count"`           // Number of snapshots.
-	SeqNo              string `json:"vg_seqno"`             // Revision number of internal metadata. Incremented whenever it changes.
-	Tags               string `json:"vg_tags"`              // Tags, if any.
-	Profile            string `json:"vg_profile"`           // Configuration profile attached to this VG.
-	MetadataCount      string `json:"vg_mda_count"`         // Number of metadata areas on this VG.
-	MetadataUsedCount  string `json:"vg_mda_used_count"`    // Number of metadata areas in use on this VG.
-	MetadataFree       string `json:"vg_mda_free"`          // Free metadata area space for this VG in current units.
-	MetadataSize       string `json:"vg_mda_size"`          // Size of smallest metadata area for this VG in current units.
-	MetadataCopies     string `json:"vg_mda_copies"`        // Target number of in use metadata areas in the VG.
+	Format             string     `json:"vg_fmt"`               // Type of metadata.
+	UUID               string     `json:"vg_uuid"`              // Unique identifier.
+	Name               string     `json:"vg_name"`              // Name of the VG.
+	Attributes         string     `json:"vg_attr"`              // Various attributes.
+	Permissions        string     `json:"vg_permissions"`       // Permissions.
+	Extendable         BoolString `json:"vg_extendable"`        // Set if VG is extendable.
+	Exported           BoolString `json:"vg_exported"`          // Set if VG is exported.
+	AutoActivation     BoolString `json:"vg_autoactivation"`    // Set if VG autoactivation is enabled.
+	Partial            BoolString `json:"vg_partial"`           // Set if VG is partial.
+	AllocationPolicy   string     `json:"vg_allocation_policy"` // VG allocation policy.
+	Clustered          BoolString `json:"vg_clustered"`         // Set if VG is clustered.
+	Shared             BoolString `json:"vg_shared"`            // Set if VG is shared.
+	Size               string     `json:"vg_size"`              // Total size of VG in current units.
+	Free               string     `json:"vg_free"`              // Total amount of free space in current units.
+	SystemID           string     `json:"vg_systemid"`          // System ID of the VG indicating which host owns it.
+	LockType           string     `json:"vg_lock_type"`         // Lock type of the VG used by lvmlockd.
+	LockArgs           string     `json:"vg_lock_args"`         // Lock args of the VG used by lvmlockd.
+	ExtentSize         string     `json:"vg_extent_size"`       // Size of Physical Extents in current units.
+	ExtentCount        IntString  `json:"vg_extent_count"`      // Total number of Physical Extents.
+	ExtentFreeCount    IntString  `json:"vg_free_count"`        // Total number of unallocated Physical Extents.
+	MaxLogicalVolumes  IntString  `json:"max_lv"`               // Maximum number of LVs allowed in VG or 0 if unlimited.
+	MaxPhysicalVolumes IntString  `json:"max_pv"`               // Maximum number of PVs allowed in VG or 0 if unlimited.
+	PVCount            IntString  `json:"pv_count"`             // Number of PVs in VG.
+	MissingPVCount     IntString  `json:"vg_missing_pv_count"`  // Number of PVs in VG which are missing.
+	LVCount            IntString  `json:"lv_count"`             // Number of LVs.
+	SnapshotCount      IntString  `json:"snap_count"`           // Number of snapshots.
+	SeqNo              IntString  `json:"vg_seqno"`             // Revision number of internal metadata. Incremented whenever it changes.
+	Tags               string     `json:"vg_tags"`              // Tags, if any.
+	Profile            string     `json:"vg_profile"`           // Configuration profile attached to this VG.
+	MetadataCount      IntString  `json:"vg_mda_count"`         // Number of metadata areas on this VG.
+	MetadataUsedCount  IntString  `json:"vg_mda_used_count"`    // Number of metadata areas in use on this VG.
+	MetadataFree       string     `json:"vg_mda_free"`          // Free metadata area space for this VG in current units.
+	MetadataSize       string     `json:"vg_mda_size"`          // Size of smallest metadata area for this VG in current units.
+	MetadataCopies     string     `json:"vg_mda_copies"`        // Target number of in use metadata areas in the VG.
 }
 
 // ListVGOptions provides options for listing VGs (vgs).
@@ -364,142 +410,142 @@ type MakeVGDeviceNodesOptions struct {
 
 // LogicalVolume represents an LVM2 Logical Volume (LV).
 type LogicalVolume struct {
-	UUID                               string `json:"lv_uuid"`                     // Unique identifier.
-	Name                               string `json:"lv_name"`                     // Name.  LVs created for internal use are enclosed in brackets.
-	FullName                           string `json:"lv_full_name"`                // Full name of LV including its VG, namely VG/LV.
-	Path                               string `json:"lv_path"`                     // Full pathname for LV. Blank for internal LVs.
-	DMPath                             string `json:"lv_dm_path"`                  // Internal device//mapper pathname for LV (in /dev/mapper directory).
-	Parent                             string `json:"lv_parent"`                   // For LVs that are components of another LV, the parent LV.
-	VGName                             string `json:"vg_name"`                     // Name of the VG the LV belongs to.
-	Layout                             string `json:"lv_layout"`                   // LV layout.
-	Role                               string `json:"lv_role"`                     // LV role.
-	InitialImageSync                   string `json:"lv_initial_image_sync"`       // Set if mirror/RAID images underwent initial resynchronization.
-	ImageSynced                        string `json:"lv_image_synced"`             // Set if mirror/RAID image is synchronized.
-	Merging                            string `json:"lv_merging"`                  // Set if snapshot LV is being merged to origin.
-	Converting                         string `json:"lv_converting"`               // Set if LV is being converted.
-	AllocationPolicy                   string `json:"lv_allocation_policy"`        // LV allocation policy.
-	AllocationLocked                   string `json:"lv_allocation_locked"`        // Set if LV is locked against allocation changes.
-	FixedMinor                         string `json:"lv_fixed_minor"`              // Set if LV has fixed minor number assigned.
-	SkipActivation                     string `json:"lv_skip_activation"`          // Set if LV is skipped on activation.
-	AutoActivation                     string `json:"lv_autoactivation"`           // Set if LV autoactivation is enabled.
-	WhenFull                           string `json:"lv_when_full"`                // For thin pools, behavior when full.
-	Active                             string `json:"lv_active"`                   // Active state of the LV.
-	ActiveLocally                      string `json:"lv_active_locally"`           // Set if the LV is active locally.
-	ActiveRemotely                     string `json:"lv_active_remotely"`          // Set if the LV is active remotely.
-	ActiveExclusively                  string `json:"lv_active_exclusively"`       // Set if the LV is active exclusively.
-	Major                              string `json:"lv_major"`                    // Persistent major number or //1 if not persistent.
-	Minor                              string `json:"lv_minor"`                    // Persistent minor number or //1 if not persistent.
-	ReadAhead                          string `json:"lv_read_ahead"`               // Read ahead setting in current units.
-	Size                               string `json:"lv_size"`                     // Size of LV in current units.
-	MetadataSize                       string `json:"lv_metadata_size"`            // For thin and cache pools, the size of the LV that holds the metadata.
-	SegmentCount                       string `json:"seg_count"`                   // Number of segments in LV.
-	Origin                             string `json:"origin"`                      // For snapshots and thins, the origin device of this LV.
-	OriginUUID                         string `json:"origin_uuid"`                 // For snapshots and thins, the UUID of origin device of this LV.
-	OriginSize                         string `json:"origin_size"`                 // For snapshots, the size of the origin device of this LV.
-	Ancestors                          string `json:"lv_ancestors"`                // LV ancestors ignoring any stored history of the ancestry chain.
-	FullAncestors                      string `json:"lv_full_ancestors"`           // LV ancestors including stored history of the ancestry chain.
-	Descendants                        string `json:"lv_descendants"`              // LV descendants ignoring any stored history of the ancestry chain.
-	FullDescendants                    string `json:"lv_full_descendants"`         // LV descendants including stored history of the ancestry chain.
-	RAIDMismatchCount                  string `json:"raid_mismatch_count"`         // For RAID, number of mismatches found or repaired.
-	RAIDSyncAction                     string `json:"raid_sync_action"`            // For RAID, the current synchronization action being performed.
-	RAIDWriteBehind                    string `json:"raid_write_behind"`           // For RAID1, the number of outstanding writes allowed to writemostly devices.
-	RAIDMinRecoveryRate                string `json:"raid_min_recovery_rate"`      // For RAID1, the minimum recovery I/O load in kiB/sec/disk.
-	RAIDMaxRecoveryRate                string `json:"raid_max_recovery_rate"`      // For RAID1, the maximum recovery I/O load in kiB/sec/disk.
-	RAIDIntegrityMode                  string `json:"raidintegritymode"`           // The integrity mode
-	RAIDIntegrityBlockSize             string `json:"raidintegrityblocksize"`      // The integrity block size
-	RAIDIntegrityMismatches            string `json:"integritymismatches"`         // The number of integrity mismatches.
-	MovePV                             string `json:"move_pv"`                     // For pvmove, Source PV of temporary LV created by pvmove.
-	MovePVUUID                         string `json:"move_pv_uuid"`                // For pvmove, the UUID of Source PV of temporary LV created by pvmove.
-	ConvertLV                          string `json:"convert_lv"`                  // For lvconvert, Name of temporary LV created by lvconvert.
-	ConvertLVUUID                      string `json:"convert_lv_uuid"`             // For lvconvert, UUID of temporary LV created by lvconvert.
-	MirrorLog                          string `json:"mirror_log"`                  // For mirrors, the LV holding the synchronisation log.
-	MirrorLogUUID                      string `json:"mirror_log_uuid"`             // For mirrors, the UUID of the LV holding the synchronisation log.
-	DataLV                             string `json:"data_lv"`                     // For cache/thin/vdo pools, the LV holding the associated data.
-	DataLVUUID                         string `json:"data_lv_uuid"`                // For cache/thin/vdo pools, the UUID of the LV holding the associated data.
-	MetadataLV                         string `json:"metadata_lv"`                 // For cache/thin pools, the LV holding the associated metadata.
-	MetadataLVUUID                     string `json:"metadata_lv_uuid"`            // For cache/thin pools, the UUID of the LV holding the associated metadata.
-	PoolLV                             string `json:"pool_lv"`                     // For cache/thin/vdo volumes, the cache/thin/vdo pool LV for this volume.
-	PoolLVUUID                         string `json:"pool_lv_uuid"`                // For cache/thin/vdo volumes, the UUID of the cache/thin/vdo pool LV for this volume.
-	Tags                               string `json:"lv_tags"`                     // Tags, if any.
-	Profile                            string `json:"lv_profile"`                  // Configuration profile attached to this LV.
-	LockArgs                           string `json:"lv_lockargs"`                 // Lock args of the LV used by lvmlockd.
-	CreationTime                       string `json:"lv_time"`                     // Creation time of the LV, if known
-	RemovalTime                        string `json:"lv_time_removed"`             // Removal time of the LV, if known
-	CreationHost                       string `json:"lv_host"`                     // Creation host of the LV, if known.
-	RequiredModules                    string `json:"lv_modules"`                  // Kernel device//mapper modules required for this LV.
-	Historical                         string `json:"lv_historical"`               // Set if the LV is historical.
-	WriteCacheBlockSize                string `json:"writecache_block_size"`       // The writecache block size
-	KernelMajor                        string `json:"lv_kernel_major"`             // Currently assigned major number or //1 if LV is not active.
-	KernelMinor                        string `json:"lv_kernel_minor"`             // Currently assigned minor number or //1 if LV is not active.
-	KernelReadAhead                    string `json:"lv_kernel_read_ahead"`        // Currently//in//use read ahead setting in current units.
-	Attributes                         string `json:"lv_attr"`                     // LV attributes.
-	Permissions                        string `json:"lv_permissions"`              // LV permissions.
-	Suspended                          string `json:"lv_suspended"`                // Set if LV is suspended.
-	LiveTable                          string `json:"lv_live_table"`               // Set if LV has live table present.
-	InactiveTable                      string `json:"lv_inactive_table"`           // Set if LV has inactive table present.
-	DeviceOpen                         string `json:"lv_device_open"`              // Set if LV device is open.
-	DataPercent                        string `json:"data_percent"`                // For snapshot, cache and thin pools and volumes, the percentage full if LV is active.
-	SnapshotPercent                    string `json:"snap_percent"`                // For snapshots, the percentage full if LV is active.
-	MetadataPercent                    string `json:"metadata_percent"`            // For cache and thin pools, the percentage of metadata full if LV is active.
-	CopyPercent                        string `json:"copy_percent"`                // For Cache, RAID, mirrors and pvmove, current percentage in//sync.
-	SyncPercent                        string `json:"sync_percent"`                // For Cache, RAID, mirrors and pvmove, current percentage in//sync.
-	CacheTotalBlocks                   string `json:"cache_total_blocks"`          // Total cache blocks.
-	CacheUsedBlocks                    string `json:"cache_used_blocks"`           // Used cache blocks.
-	CacheDirtyBlocks                   string `json:"cache_dirty_blocks"`          // Dirty cache blocks.
-	CacheReadHits                      string `json:"cache_read_hits"`             // Cache read hits.
-	CacheReadMisses                    string `json:"cache_read_misses"`           // Cache read misses.
-	CacheWriteHits                     string `json:"cache_write_hits"`            // Cache write hits.
-	CacheWriteMisses                   string `json:"cache_write_misses"`          // Cache write misses.
-	KernelCacheSettings                string `json:"kernel_cache_settings"`       // Cache settings/parameters as set in kernel, including default values (cached segments only).
-	KernelCachePolicy                  string `json:"kernel_cache_policy"`         // Cache policy used in kernel.
-	KernelMetadataFormat               string `json:"kernel_metadata_format"`      // Cache metadata format used in kernel.
-	HealthStatus                       string `json:"lv_health_status"`            // LV health status.
-	KernelDiscards                     string `json:"kernel_discards"`             // For thin pools, how discards are handled in kernel.
-	CheckNeeded                        string `json:"lv_check_needed"`             // For thin pools and cache volumes, whether metadata check is needed.
-	MergeFailed                        string `json:"lv_merge_failed"`             // Set if snapshot merge failed.
-	SnapshotInvalid                    string `json:"lv_snapshot_invalid"`         // Set if snapshot LV is invalid.
-	VDOOperatingMode                   string `json:"vdo_operating_mode"`          // For vdo pools, its current operating mode.
-	VDOCompressionState                string `json:"vdo_compression_state"`       // For vdo pools, whether compression is running.
-	VDOIndexState                      string `json:"vdo_index_state"`             // For vdo pools, state of index for deduplication.
-	VDOUsedSize                        string `json:"vdo_used_size"`               // For vdo pools, currently used space.
-	VDOSavingPercent                   string `json:"vdo_saving_percent"`          // For vdo pools, percentage of saved space.
-	WriteCacheTotalBlocks              string `json:"writecache_total_blocks"`     // Total writecache blocks.
-	WriteCacheFreeBlocks               string `json:"writecache_free_blocks"`      // Total writecache free blocks.
-	WriteCacheWritebackBlocks          string `json:"writecache_writeback_blocks"` // Total writecache writeback blocks.
-	WriteCacheErrors                   string `json:"writecache_error"`            // Total writecache errors.
-	Type                               string `json:"segtype"`                     // Type of LV segment.
-	Stripes                            string `json:"stripes"`                     // Number of stripes or mirror/raid1 legs.
-	DataStripes                        string `json:"data_stripes"`                // Number of data stripes or mirror/raid1 legs.
-	ReshapeLength                      string `json:"reshape_len"`                 // Size of out//of//place reshape space in current units.
-	ReshapeLengthPhysicalExtents       string `json:"reshape_len_le"`              // Size of out//of//place reshape space in logical extents.
-	DataCopies                         string `json:"data_copies"`                 // Number of data copies.
-	DataOffset                         string `json:"data_offset"`                 // Data offset on each image device.
-	NewDataOffset                      string `json:"new_data_offset"`             // New data offset after any reshape on each image device.
-	ParityChunks                       string `json:"parity_chunks"`               // Number of (rotating) parity chunks.
-	StripeSize                         string `json:"stripe_size"`                 // For stripes, amount of data placed on one device before switching to the next.
-	RegionSize                         string `json:"region_size"`                 // For mirrors/raids, the unit of data per leg when synchronizing devices.
-	ChunkSize                          string `json:"chunk_size"`                  // For snapshots, the unit of data used when tracking changes.
-	ThinCount                          string `json:"thin_count"`                  // For thin pools, the number of thin volumes in this pool.
-	Discards                           string `json:"discards"`                    // For thin pools, how discards are handled.
-	CacheMetadataFormat                string `json:"cache_metadata_format"`       // For cache, metadata format in use.
-	CacheMode                          string `json:"cache_mode"`                  // For cache, how writes are cached.
-	Zero                               string `json:"zero"`                        // For thin pools and volumes, if zeroing is enabled.
-	TransactionID                      string `json:"transaction_id"`              // For thin pools, the transaction id and creation transaction id for thins.
-	ThinID                             string `json:"thin_id"`                     // For thin volume, the thin device id.
-	SegmentStart                       string `json:"seg_start"`                   // Offset within the LV to the start of the segment in current units.
-	SegmentStartPhysicalExtents        string `json:"seg_start_pe"`                // Offset within the LV to the start of the segment in physical extents.
-	SegmentSize                        string `json:"seg_size"`                    // Size of segment in current units.
-	SegmentSizePhysicalExtents         string `json:"seg_size_pe"`                 // Size of segment in physical extents.
-	SegmentTags                        string `json:"seg_tags"`                    // Tags, if any.
-	SegmentLogicalExtentRanges         string `json:"seg_le_ranges"`               // Ranges of Logical Extents of underlying devices in command line format.
-	SegmentMetadataLogicalExtentRanges string `json:"seg_metadata_le_ranges"`      // Ranges of Logical Extents of underlying metadata devices in command line format.
-	Devices                            string `json:"devices"`                     // Underlying devices used with starting extent numbers.
-	MetadataDevices                    string `json:"metadata_devices"`            // Underlying metadata devices used with starting extent numbers.
-	Monitor                            string `json:"seg_monitor"`                 // Dmeventd monitoring status of the segment.
-	CachePolicy                        string `json:"cache_policy"`                // The cache policy (cached segments only).
-	CacheSettings                      string `json:"cache_settings"`              // Cache settings/parameters (cached segments only).
-	VDOCompression                     string `json:"vdo_compression"`             // Set for compressed LV (vdopool).
-	VDODeduplication                   string `json:"vdo_deduplication"`           // Set for deduplicated LV (vdopool).
+	UUID                               string     `json:"lv_uuid"`                     // Unique identifier.
+	Name                               string     `json:"lv_name"`                     // Name.  LVs created for internal use are enclosed in brackets.
+	FullName                           string     `json:"lv_full_name"`                // Full name of LV including its VG, namely VG/LV.
+	Path                               string     `json:"lv_path"`                     // Full pathname for LV. Blank for internal LVs.
+	DMPath                             string     `json:"lv_dm_path"`                  // Internal device//mapper pathname for LV (in /dev/mapper directory).
+	Parent                             string     `json:"lv_parent"`                   // For LVs that are components of another LV, the parent LV.
+	VGName                             string     `json:"vg_name"`                     // Name of the VG the LV belongs to.
+	Layout                             string     `json:"lv_layout"`                   // LV layout.
+	Role                               string     `json:"lv_role"`                     // LV role.
+	InitialImageSync                   BoolString `json:"lv_initial_image_sync"`       // Set if mirror/RAID images underwent initial resynchronization.
+	ImageSynced                        BoolString `json:"lv_image_synced"`             // Set if mirror/RAID image is synchronized.
+	Merging                            BoolString `json:"lv_merging"`                  // Set if snapshot LV is being merged to origin.
+	Converting                         BoolString `json:"lv_converting"`               // Set if LV is being converted.
+	AllocationPolicy                   string     `json:"lv_allocation_policy"`        // LV allocation policy.
+	AllocationLocked                   BoolString `json:"lv_allocation_locked"`        // Set if LV is locked against allocation changes.
+	FixedMinor                         BoolString `json:"lv_fixed_minor"`              // Set if LV has fixed minor number assigned.
+	SkipActivation                     BoolString `json:"lv_skip_activation"`          // Set if LV is skipped on activation.
+	AutoActivation                     BoolString `json:"lv_autoactivation"`           // Set if LV autoactivation is enabled.
+	WhenFull                           string     `json:"lv_when_full"`                // For thin pools, behavior when full.
+	Active                             string     `json:"lv_active"`                   // Active state of the LV.
+	ActiveLocally                      BoolString `json:"lv_active_locally"`           // Set if the LV is active locally.
+	ActiveRemotely                     BoolString `json:"lv_active_remotely"`          // Set if the LV is active remotely.
+	ActiveExclusively                  BoolString `json:"lv_active_exclusively"`       // Set if the LV is active exclusively.
+	Major                              IntString  `json:"lv_major"`                    // Persistent major number or -1 if not persistent.
+	Minor                              IntString  `json:"lv_minor"`                    // Persistent minor number or -1 if not persistent.
+	ReadAhead                          string     `json:"lv_read_ahead"`               // Read ahead setting in current units.
+	Size                               string     `json:"lv_size"`                     // Size of LV in current units.
+	MetadataSize                       string     `json:"lv_metadata_size"`            // For thin and cache pools, the size of the LV that holds the metadata.
+	SegmentCount                       IntString  `json:"seg_count"`                   // Number of segments in LV.
+	Origin                             string     `json:"origin"`                      // For snapshots and thins, the origin device of this LV.
+	OriginUUID                         string     `json:"origin_uuid"`                 // For snapshots and thins, the UUID of origin device of this LV.
+	OriginSize                         string     `json:"origin_size"`                 // For snapshots, the size of the origin device of this LV.
+	Ancestors                          string     `json:"lv_ancestors"`                // LV ancestors ignoring any stored history of the ancestry chain.
+	FullAncestors                      string     `json:"lv_full_ancestors"`           // LV ancestors including stored history of the ancestry chain.
+	Descendants                        string     `json:"lv_descendants"`              // LV descendants ignoring any stored history of the ancestry chain.
+	FullDescendants                    string     `json:"lv_full_descendants"`         // LV descendants including stored history of the ancestry chain.
+	RAIDMismatchCount                  IntString  `json:"raid_mismatch_count"`         // For RAID, number of mismatches found or repaired.
+	RAIDSyncAction                     string     `json:"raid_sync_action"`            // For RAID, the current synchronization action being performed.
+	RAIDWriteBehind                    string     `json:"raid_write_behind"`           // For RAID1, the number of outstanding writes allowed to writemostly devices.
+	RAIDMinRecoveryRate                string     `json:"raid_min_recovery_rate"`      // For RAID1, the minimum recovery I/O load in kiB/sec/disk.
+	RAIDMaxRecoveryRate                string     `json:"raid_max_recovery_rate"`      // For RAID1, the maximum recovery I/O load in kiB/sec/disk.
+	RAIDIntegrityMode                  string     `json:"raidintegritymode"`           // The integrity mode
+	RAIDIntegrityBlockSize             string     `json:"raidintegrityblocksize"`      // The integrity block size
+	RAIDIntegrityMismatches            IntString  `json:"integritymismatches"`         // The number of integrity mismatches.
+	MovePV                             string     `json:"move_pv"`                     // For pvmove, Source PV of temporary LV created by pvmove.
+	MovePVUUID                         string     `json:"move_pv_uuid"`                // For pvmove, the UUID of Source PV of temporary LV created by pvmove.
+	ConvertLV                          string     `json:"convert_lv"`                  // For lvconvert, Name of temporary LV created by lvconvert.
+	ConvertLVUUID                      string     `json:"convert_lv_uuid"`             // For lvconvert, UUID of temporary LV created by lvconvert.
+	MirrorLog                          string     `json:"mirror_log"`                  // For mirrors, the LV holding the synchronisation log.
+	MirrorLogUUID                      string     `json:"mirror_log_uuid"`             // For mirrors, the UUID of the LV holding the synchronisation log.
+	DataLV                             string     `json:"data_lv"`                     // For cache/thin/vdo pools, the LV holding the associated data.
+	DataLVUUID                         string     `json:"data_lv_uuid"`                // For cache/thin/vdo pools, the UUID of the LV holding the associated data.
+	MetadataLV                         string     `json:"metadata_lv"`                 // For cache/thin pools, the LV holding the associated metadata.
+	MetadataLVUUID                     string     `json:"metadata_lv_uuid"`            // For cache/thin pools, the UUID of the LV holding the associated metadata.
+	PoolLV                             string     `json:"pool_lv"`                     // For cache/thin/vdo volumes, the cache/thin/vdo pool LV for this volume.
+	PoolLVUUID                         string     `json:"pool_lv_uuid"`                // For cache/thin/vdo volumes, the UUID of the cache/thin/vdo pool LV for this volume.
+	Tags                               string     `json:"lv_tags"`                     // Tags, if any.
+	Profile                            string     `json:"lv_profile"`                  // Configuration profile attached to this LV.
+	LockArgs                           string     `json:"lv_lockargs"`                 // Lock args of the LV used by lvmlockd.
+	CreationTime                       string     `json:"lv_time"`                     // Creation time of the LV, if known
+	RemovalTime                        string     `json:"lv_time_removed"`             // Removal time of the LV, if known
+	CreationHost                       string     `json:"lv_host"`                     // Creation host of the LV, if known.
+	RequiredModules                    string     `json:"lv_modules"`                  // Kernel device-mapper modules required for this LV.
+	Historical                         BoolString `json:"lv_historical"`               // Set if the LV is historical.
+	WriteCacheBlockSize                string     `json:"writecache_block_size"`       // The writecache block size
+	KernelMajor                        string     `json:"lv_kernel_major"`             // Currently assigned major number or -1 if LV is not active.
+	KernelMinor                        string     `json:"lv_kernel_minor"`             // Currently assigned minor number or -1 if LV is not active.
+	KernelReadAhead                    string     `json:"lv_kernel_read_ahead"`        // Currently-in-use read ahead setting in current units.
+	Attributes                         string     `json:"lv_attr"`                     // LV attributes.
+	Permissions                        BoolString `json:"lv_permissions"`              // LV permissions.
+	Suspended                          BoolString `json:"lv_suspended"`                // Set if LV is suspended.
+	LiveTable                          BoolString `json:"lv_live_table"`               // Set if LV has live table present.
+	InactiveTable                      BoolString `json:"lv_inactive_table"`           // Set if LV has inactive table present.
+	DeviceOpen                         BoolString `json:"lv_device_open"`              // Set if LV device is open.
+	DataPercent                        string     `json:"data_percent"`                // For snapshot, cache and thin pools and volumes, the percentage full if LV is active.
+	SnapshotPercent                    string     `json:"snap_percent"`                // For snapshots, the percentage full if LV is active.
+	MetadataPercent                    string     `json:"metadata_percent"`            // For cache and thin pools, the percentage of metadata full if LV is active.
+	CopyPercent                        string     `json:"copy_percent"`                // For Cache, RAID, mirrors and pvmove, current percentage in-sync.
+	SyncPercent                        string     `json:"sync_percent"`                // For Cache, RAID, mirrors and pvmove, current percentage in-sync.
+	CacheTotalBlocks                   IntString  `json:"cache_total_blocks"`          // Total cache blocks.
+	CacheUsedBlocks                    IntString  `json:"cache_used_blocks"`           // Used cache blocks.
+	CacheDirtyBlocks                   IntString  `json:"cache_dirty_blocks"`          // Dirty cache blocks.
+	CacheReadHits                      IntString  `json:"cache_read_hits"`             // Cache read hits.
+	CacheReadMisses                    IntString  `json:"cache_read_misses"`           // Cache read misses.
+	CacheWriteHits                     IntString  `json:"cache_write_hits"`            // Cache write hits.
+	CacheWriteMisses                   IntString  `json:"cache_write_misses"`          // Cache write misses.
+	KernelCacheSettings                string     `json:"kernel_cache_settings"`       // Cache settings/parameters as set in kernel, including default values (cached segments only).
+	KernelCachePolicy                  string     `json:"kernel_cache_policy"`         // Cache policy used in kernel.
+	KernelMetadataFormat               string     `json:"kernel_metadata_format"`      // Cache metadata format used in kernel.
+	HealthStatus                       string     `json:"lv_health_status"`            // LV health status.
+	KernelDiscards                     string     `json:"kernel_discards"`             // For thin pools, how discards are handled in kernel.
+	CheckNeeded                        string     `json:"lv_check_needed"`             // For thin pools and cache volumes, whether metadata check is needed.
+	MergeFailed                        BoolString `json:"lv_merge_failed"`             // Set if snapshot merge failed.
+	SnapshotInvalid                    BoolString `json:"lv_snapshot_invalid"`         // Set if snapshot LV is invalid.
+	VDOOperatingMode                   string     `json:"vdo_operating_mode"`          // For vdo pools, its current operating mode.
+	VDOCompressionState                string     `json:"vdo_compression_state"`       // For vdo pools, whether compression is running.
+	VDOIndexState                      string     `json:"vdo_index_state"`             // For vdo pools, state of index for deduplication.
+	VDOUsedSize                        string     `json:"vdo_used_size"`               // For vdo pools, currently used space.
+	VDOSavingPercent                   string     `json:"vdo_saving_percent"`          // For vdo pools, percentage of saved space.
+	WriteCacheTotalBlocks              IntString  `json:"writecache_total_blocks"`     // Total writecache blocks.
+	WriteCacheFreeBlocks               IntString  `json:"writecache_free_blocks"`      // Total writecache free blocks.
+	WriteCacheWritebackBlocks          IntString  `json:"writecache_writeback_blocks"` // Total writecache writeback blocks.
+	WriteCacheErrors                   IntString  `json:"writecache_error"`            // Total writecache errors.
+	Type                               string     `json:"segtype"`                     // Type of LV segment.
+	Stripes                            IntString  `json:"stripes"`                     // Number of stripes or mirror/raid1 legs.
+	DataStripes                        IntString  `json:"data_stripes"`                // Number of data stripes or mirror/raid1 legs.
+	ReshapeLength                      string     `json:"reshape_len"`                 // Size of out-of-place reshape space in current units.
+	ReshapeLengthExtents               string     `json:"reshape_len_le"`              // Size of out-of-place reshape space in logical extents.
+	DataCopies                         IntString  `json:"data_copies"`                 // Number of data copies.
+	DataOffset                         string     `json:"data_offset"`                 // Data offset on each image device.
+	NewDataOffset                      string     `json:"new_data_offset"`             // New data offset after any reshape on each image device.
+	ParityChunks                       IntString  `json:"parity_chunks"`               // Number of (rotating) parity chunks.
+	StripeSize                         string     `json:"stripe_size"`                 // For stripes, amount of data placed on one device before switching to the next.
+	RegionSize                         string     `json:"region_size"`                 // For mirrors/raids, the unit of data per leg when synchronizing devices.
+	ChunkSize                          string     `json:"chunk_size"`                  // For snapshots, the unit of data used when tracking changes.
+	ThinCount                          IntString  `json:"thin_count"`                  // For thin pools, the number of thin volumes in this pool.
+	Discards                           string     `json:"discards"`                    // For thin pools, how discards are handled.
+	CacheMetadataFormat                string     `json:"cache_metadata_format"`       // For cache, metadata format in use.
+	CacheMode                          string     `json:"cache_mode"`                  // For cache, how writes are cached.
+	Zero                               BoolString `json:"zero"`                        // For thin pools and volumes, if zeroing is enabled.
+	TransactionID                      string     `json:"transaction_id"`              // For thin pools, the transaction id and creation transaction id for thins.
+	ThinID                             string     `json:"thin_id"`                     // For thin volume, the thin device id.
+	SegmentStart                       string     `json:"seg_start"`                   // Offset within the LV to the start of the segment in current units.
+	SegmentStartExtents                string     `json:"seg_start_pe"`                // Offset within the LV to the start of the segment in physical extents.
+	SegmentSize                        string     `json:"seg_size"`                    // Size of segment in current units.
+	SegmentSizeExtents                 string     `json:"seg_size_pe"`                 // Size of segment in physical extents.
+	SegmentTags                        string     `json:"seg_tags"`                    // Tags, if any.
+	SegmentLogicalExtentRanges         string     `json:"seg_le_ranges"`               // Ranges of Logical Extents of underlying devices in command line format.
+	SegmentMetadataLogicalExtentRanges string     `json:"seg_metadata_le_ranges"`      // Ranges of Logical Extents of underlying metadata devices in command line format.
+	Devices                            string     `json:"devices"`                     // Underlying devices used with starting extent numbers.
+	MetadataDevices                    string     `json:"metadata_devices"`            // Underlying metadata devices used with starting extent numbers.
+	Monitor                            string     `json:"seg_monitor"`                 // Dmeventd monitoring status of the segment.
+	CachePolicy                        string     `json:"cache_policy"`                // The cache policy (cached segments only).
+	CacheSettings                      string     `json:"cache_settings"`              // Cache settings/parameters (cached segments only).
+	VDOCompression                     BoolString `json:"vdo_compression"`             // Set for compressed LV (vdopool).
+	VDODeduplication                   BoolString `json:"vdo_deduplication"`           // Set for deduplicated LV (vdopool).
 }
 
 // ListLVOptions provides options for listing LVs (lvs).

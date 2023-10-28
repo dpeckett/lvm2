@@ -33,7 +33,7 @@ func NewClient() *Client {
 
 // Display attributes of a physical volume/s.
 func (c *Client) ListPhysicalVolumes(ctx context.Context, opts *ListPVOptions) ([]PhysicalVolume, error) {
-	args := []string{"pvs", "--reportformat=json", "--options=pv_all,vg_name"}
+	args := []string{"pvs", "--reportformat=json", "--binary", "--options=pv_all,vg_name"}
 	if opts != nil {
 		args = append(args, MarshalArgs(opts)...)
 	}
@@ -115,7 +115,7 @@ func (c *Client) ResizePhysicalVolume(ctx context.Context, opts ResizePVOptions)
 
 // Display volume group/s information.
 func (c *Client) ListVolumeGroups(ctx context.Context, opts *ListVGOptions) ([]VolumeGroup, error) {
-	args := []string{"vgs", "--reportformat=json", "--options=vg_all"}
+	args := []string{"vgs", "--reportformat=json", "--binary", "--options=vg_all"}
 	if opts != nil {
 		args = append(args, MarshalArgs(opts)...)
 	}
@@ -260,7 +260,7 @@ func (c *Client) MakeVolumeGroupDeviceNodes(ctx context.Context, opts MakeVGDevi
 
 // Display logical volume/s information.
 func (c *Client) ListLogicalVolumes(ctx context.Context, opts *ListLVOptions) ([]LogicalVolume, error) {
-	args := []string{"lvs", "--reportformat=json", "--options=lv_all,seg_all,vg_name"}
+	args := []string{"lvs", "--reportformat=json", "--binary", "--options=lv_all,seg_all,vg_name"}
 	if opts != nil {
 		args = append(args, MarshalArgs(opts)...)
 	}

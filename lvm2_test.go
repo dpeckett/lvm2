@@ -186,7 +186,7 @@ func TestClient(t *testing.T) {
 
 		require.Len(t, vgs, 1)
 		require.Equal(t, vgName, vgs[0].Name)
-		require.Equal(t, "1", vgs[0].PVCount)
+		require.Equal(t, 1, int(vgs[0].PVCount))
 
 		t.Log("Activating volume group")
 
@@ -210,7 +210,7 @@ func TestClient(t *testing.T) {
 		require.NoError(t, err, "failed to list VGs")
 
 		require.Len(t, vgs, 1)
-		require.Equal(t, "2", vgs[0].PVCount)
+		require.Equal(t, 2, int(vgs[0].PVCount))
 
 		t.Log("Splitting volume group")
 
@@ -253,8 +253,8 @@ func TestClient(t *testing.T) {
 		require.NoError(t, err, "failed to list VGs")
 
 		require.Len(t, vgs, 2)
-		require.Equal(t, "1", vgs[0].PVCount)
-		require.Equal(t, "1", vgs[1].PVCount)
+		require.Equal(t, 1, int(vgs[0].PVCount))
+		require.Equal(t, 1, int(vgs[1].PVCount))
 
 		t.Log("Merging volume groups")
 
