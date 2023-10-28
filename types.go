@@ -74,7 +74,7 @@ type PhysicalVolume struct {
 	MetadataFree           string     `json:"pv_mda_free"`       // Free metadata area space on this device in current units.
 	MetadataSize           string     `json:"pv_mda_size"`       // Size of smallest metadata area on this device in current units.
 	HeaderExtensionVersion IntString  `json:"pv_ext_vsn"`        // PV header extension version.
-	PEStart                string     `json:"pe_start"`          // Offset to start of data on the underlying device.
+	ExtentStart            string     `json:"pe_start"`          // Offset to start of data on the underlying device.
 	Size                   string     `json:"pv_size"`           // Size of the physical volume in current units.
 	FreeSpace              string     `json:"pv_free"`           // Total unallocated space in current units.
 	UsedSpace              string     `json:"pv_used"`           // Total allocated space in current units.
