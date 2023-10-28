@@ -1,0 +1,9 @@
+# run a command on remove events
+ACTION=="remove", ENV{REMOVE_CMD}!="", RUN+="$env{REMOVE_CMD}"
+ACTION=="remove", GOTO="default_end"
+
+# The md driver increments diskseq *after* emitting 'change' uevent.
+# Drop the line below if it is fixed on the kernel side.
+SUBSYSTEM=="block", KERNEL=="md*", ENV{ID_IGNORE_DISKSEQ}="1"
+
+LABEL="default_end"

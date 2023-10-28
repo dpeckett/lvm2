@@ -1,2 +1,3 @@
-# lvmclient
-A Go library for working with Linux Logical Volume Management.
+# lvm2
+
+A Go library for working with LVM2.
