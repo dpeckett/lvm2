@@ -50,8 +50,8 @@ type PhysicalVolume struct {
 	VGName                 string `json:"vg_name"`           // Name of the VG the PV belongs to.
 }
 
-// PVListOptions provides options for listing PVs.
-type PVListOptions struct {
+// ListPVOptions provides options for listing PVs (pvs).
+type ListPVOptions struct {
 	CommonOptions
 	Names                []string `arg:"0"`                      // Specific PVs to display.
 	All                  bool     `arg:"--all"`                  // Display devices not initialized by LVM.
@@ -62,8 +62,8 @@ type PVListOptions struct {
 	Shared               bool     `arg:"--shared"`               // Displays shared VGs without active lvmlockd.
 }
 
-// PVCreateOptions provides options for creating PVs.
-type PVCreateOptions struct {
+// CreatePVOptions provides options for creating PVs (pvcreate).
+type CreatePVOptions struct {
 	CommonOptions
 	Name                  string `arg:"0"`                       // Device or PV to create.
 	Force                 bool   `arg:"--force"`                 // Override checks and protections.
@@ -72,8 +72,8 @@ type PVCreateOptions struct {
 	DataAlignment         string `arg:"--dataalignment"`         // Align PV data's start, may be shifted by DataAlignmentOffset.
 	DataAlignmentOffset   string `arg:"--dataalignmentoffset"`   // Additional shift for PV data's start.
 	BootloaderAreaSize    string `arg:"--bootloaderareasize"`    // Reserved space for the bootloader.
-	LabelSector           int    `arg:"--labelsector"`           // Sector for the LVM2 identifier.
-	MetadataCopies        int    `arg:"--pvmetadatacopies"`      // Number of metadata areas on a PV.
+	LabelSector           *int   `arg:"--labelsector"`           // Sector for the LVM2 identifier.
+	MetadataCopies        *int   `arg:"--pvmetadatacopies"`      // Number of metadata areas on a PV.
 	MetadataSize          string `arg:"--metadatasize"`          // Space for each VG metadata area.
 	MetadataIgnore        *YesNo `arg:"--metadataignore"`        // If set, metadata won't be stored on the PV.
 	NoRestoreFile         bool   `arg:"--norestorefile"`         // Specify UUID without a metadata backup.
@@ -81,8 +81,8 @@ type PVCreateOptions struct {
 	RestoreFile           string `arg:"--restorefile"`           // Align physical extents based on file's content with UUID.
 }
 
-// PVChangeOptions provides options to modify PVs.
-type PVChangeOptions struct {
+// UpdatePVOptions provides options to modify PVs (pvchange).
+type UpdatePVOptions struct {
 	CommonOptions
 	Name           string   `arg:"0"`                // Device or PV to modify.
 	Force          bool     `arg:"--force"`          // Override checks and protections.
@@ -96,15 +96,15 @@ type PVChangeOptions struct {
 	Select         string   `arg:"--select"`         // Filter objects based on criteria.
 }
 
-// PVRemoveOptions provides options for removing PVs.
-type PVRemoveOptions struct {
+// RemovePVOptions provides options for removing PVs (pvremove).
+type RemovePVOptions struct {
 	CommonOptions
 	Name  string `arg:"0"`       // Device or PV to remove.
 	Force bool   `arg:"--force"` // Overrides checks and protections.
 }
 
-// PVCheckOptions provides options for checking PVs.
-type PVCheckOptions struct {
+// CheckPVOptions provides options for checking PVs (pvck).
+type CheckPVOptions struct {
 	CommonOptions
 	Name             string   `arg:"0"`                  // Device or PV to check.
 	Dump             string   `arg:"--dump"`             // Which header or metadata to dump.
@@ -116,8 +116,8 @@ type PVCheckOptions struct {
 	Settings         []string `arg:"--settings"`         // Command specific settings in `key=value` format.
 }
 
-// PVMoveOptions provides options for moving PVs.
-type PVMoveOptions struct {
+// MovePEOptions provides options for moving PVs (pvmove).
+type MovePEOptions struct {
 	CommonOptions
 	Source      string   `arg:"0"`            // Device or PV to move.
 	Destination []string `arg:"1"`            // Device or PV to move to.
@@ -131,8 +131,8 @@ type PVMoveOptions struct {
 	NoUdevSync  bool     `arg:"--noudevsync"` // Allow operations to proceed without waiting for udev notifications.
 }
 
-// PVResizeOptions provides options for resizing PVs.
-type PVResizeOptions struct {
+// ResizePVOptions provides options for resizing PVs (pvresize).
+type ResizePVOptions struct {
 	CommonOptions
 	Name                  string `arg:"0"`                       // Device or PV to resize.
 	SetPhysicalVolumeSize string `arg:"--setphysicalvolumesize"` // Manually set the PV size.
@@ -176,8 +176,8 @@ type VolumeGroup struct {
 	MetadataCopies     string `json:"vg_mda_copies"`        // Target number of in use metadata areas in the VG.
 }
 
-// VGListOptions provides options for listing VGs.
-type VGListOptions struct {
+// ListVGOptions provides options for listing VGs (vgs).
+type ListVGOptions struct {
 	CommonOptions
 	Names                []string `arg:"0"`                      // Specific VGs to display.
 	Select               string   `arg:"--select"`               // Filters objects based on criteria.
@@ -187,8 +187,8 @@ type VGListOptions struct {
 	Shared               bool     `arg:"--shared"`               // Displays shared VGs without active lvmlockd.
 }
 
-// VGCreateOptions provides options for creating VGs.
-type VGCreateOptions struct {
+// CreateVGOptions provides options for creating VGs (vgcreate).
+type CreateVGOptions struct {
 	CommonOptions
 	Name                string   `arg:"0"`                     // Name of the VG to create.
 	PVNames             []string `arg:"1"`                     // List of PVs to add to the VG.
@@ -212,8 +212,8 @@ type VGCreateOptions struct {
 	SetAutoActivation   *YesNo   `arg:"--setautoactivation"`   // Enable autoactivation for the VG.
 }
 
-// VGChangeOptions provides options for modifying VGs.
-type VGChangeOptions struct {
+// UpdateVGOptions provides options for modifying VGs (vgchange).
+type UpdateVGOptions struct {
 	CommonOptions
 	Name                 string   `arg:"0"`                      // Name of the VG to modify.
 	MaxLogicalVolumes    *int     `arg:"--logicalvolume"`        // Max number of LVs allowed in a VG.
@@ -250,8 +250,8 @@ type VGChangeOptions struct {
 	SystemID             string   `arg:"--systemid"`             // Changes the system ID of the VG.
 }
 
-// VGRemoveOptions are options for removing VGs.
-type VGRemoveOptions struct {
+// RemoveVGOptions are options for removing VGs (vgremove).
+type RemoveVGOptions struct {
 	CommonOptions
 	Name       string `arg:"0"`            // Name of the VG to remove.
 	Force      bool   `arg:"--force"`      // Overrides checks and protections.
@@ -259,23 +259,23 @@ type VGRemoveOptions struct {
 	NoUdevSync bool   `arg:"--noudevsync"` // Allow operations to proceed without waiting for udev notifications.
 }
 
-// VGCheckOptions provides options for checking VGs.
-type VGCheckOptions struct {
+// CheckVGOptions provides options for checking VGs (vgck).
+type CheckVGOptions struct {
 	CommonOptions
 	Name           string `arg:"0"`                // Name of the VG to check.
 	UpdateMetadata bool   `arg:"--updatemetadata"` // Correct VG metadata inconsistencies.
 }
 
-// VGExportOptions provides options for exporting VGs.
-type VGExportOptions struct {
+// ExportVGOptions provides options for exporting VGs (vgexport).
+type ExportVGOptions struct {
 	CommonOptions
 	Name   string `arg:"0"`        // Name of the VG to export.
 	Select string `arg:"--select"` // Filters objects based on criteria.
 	All    bool   `arg:"--all"`    // Export all VGs.
 }
 
-// VGImportOptions provides options for importing VGs.
-type VGImportOptions struct {
+// ImportVGOptions provides options for importing VGs (vgimport).
+type ImportVGOptions struct {
 	CommonOptions
 	Name   string `arg:"0"`        // Name of the VG to import.
 	Select string `arg:"--select"` // Filters objects based on criteria.
@@ -283,8 +283,8 @@ type VGImportOptions struct {
 	Force  bool   `arg:"--force"`  // Overrides checks and protections.
 }
 
-// VGImportCloneOptions provides options for importing VGs from cloned PVs.
-type VGImportCloneOptions struct {
+// ImportVGFromClonedOptions provides options for importing VGs from cloned PVs (vgimportclone).
+type ImportVGFromClonedOptions struct {
 	CommonOptions
 	Name          string   `arg:"--name"`          // Name of the VG to import.
 	PVNames       []string `arg:"0"`               // List of PVs to import from.
@@ -292,8 +292,17 @@ type VGImportCloneOptions struct {
 	ImportDevices bool     `arg:"--importdevices"` // Add devices to the devices file.
 }
 
-// VGExtendOptions provides options for extending VGs.
-type VGExtendOptions struct {
+// MergeVGOptions provides options for merging VGs (vgmerge).
+type MergeVGOptions struct {
+	CommonOptions
+	Destination       string `arg:"0"`                   // Name of the VG to merge into.
+	Source            string `arg:"1"`                   // Name of the VG to merge.
+	AutoBackup        *YesNo `arg:"--autobackup"`        // Auto backup metadata after changes.
+	PoolMetadataSpare *YesNo `arg:"--poolmetadataspare"` // Toggles the automtic creation and management of a spare pool metadata LV in the VG.
+}
+
+// ExtendVGOptions provides options for extending VGs (vgextend).
+type ExtendVGOptions struct {
 	CommonOptions
 	Name                string   `arg:"0"`                     // Name of the VG to extend.
 	PVNames             []string `arg:"1"`                     // List of PVs to add to the VG.
@@ -309,17 +318,8 @@ type VGExtendOptions struct {
 	RestoreMissing      bool     `arg:"--restoremissing"`      // Add a PV back into a VG after the PV was missing and then returned.
 }
 
-// VGMergeOptions provides options for merging VGs.
-type VGMergeOptions struct {
-	CommonOptions
-	Destination       string `arg:"0"`                   // Name of the VG to merge into.
-	Source            string `arg:"1"`                   // Name of the VG to merge.
-	AutoBackup        *YesNo `arg:"--autobackup"`        // Auto backup metadata after changes.
-	PoolMetadataSpare *YesNo `arg:"--poolmetadataspare"` // Toggles the automtic creation and management of a spare pool metadata LV in the VG.
-}
-
-// VGReduceOptions provides options for reducing VGs.
-type VGReduceOptions struct {
+// ReduceVGOptions provides options for reducing VGs (vgreduce).
+type ReduceVGOptions struct {
 	CommonOptions
 	Name          string   `arg:"0"`               // Name of the VG to reduce.
 	PVNames       []string `arg:"1"`               // List of PVs to remove from the VG.
@@ -330,8 +330,8 @@ type VGReduceOptions struct {
 	Force         bool     `arg:"--force"`         // Override checks and protections.
 }
 
-// VGRenameOptions provides options for renaming VGs.
-type VGRenameOptions struct {
+// RenameVGOptions provides options for renaming VGs (vgrename).
+type RenameVGOptions struct {
 	CommonOptions
 	From       string `arg:"0"`            // Name of the VG to rename.
 	To         string `arg:"1"`            // New name for the VG.
@@ -339,8 +339,8 @@ type VGRenameOptions struct {
 	Force      bool   `arg:"--force"`      // Override checks and protections.
 }
 
-// VGSplitOptions provides options for moving PVs between VGs.
-type VGSplitOptions struct {
+// MovePVOptions provides options for moving PVs between VGs (vgsplit).
+type MovePVOptions struct {
 	CommonOptions
 	Source             string   `arg:"0"`                    // Name of the VG to move PVs from.
 	Destination        string   `arg:"1"`                    // Name of the VG to move PVs to.
@@ -354,8 +354,8 @@ type VGSplitOptions struct {
 	VGMetadataCopies   string   `arg:"--vgmetadatacopies"`   // Number of copies of VG metadata.
 }
 
-// VGMknodesOptions provides options for creating LV device nodes for a VG.
-type VGMknodesOptions struct {
+// MakeVGDeviceNodesOptions provides options for creating LV device nodes for a VG (vgmknodes).
+type MakeVGDeviceNodesOptions struct {
 	CommonOptions
 	Name                 string `arg:"0"`                      // Name of the VG.
 	IgnoreLockingFailure bool   `arg:"--ignorelockingfailure"` // Whether to proceed in read-only mode after lock failures.
@@ -502,8 +502,8 @@ type LogicalVolume struct {
 	VDODeduplication                   string `json:"vdo_deduplication"`           // Set for deduplicated LV (vdopool).
 }
 
-// LVListOptions provides options for listing LVs.
-type LVListOptions struct {
+// ListLVOptions provides options for listing LVs (lvs).
+type ListLVOptions struct {
 	CommonOptions
 	Names                []string `arg:"0"`                      // Specific LVs to display.
 	History              bool     `arg:"--history"`              // Include historical LVs if `record_lvs_history` is enabled.
@@ -515,8 +515,8 @@ type LVListOptions struct {
 	Shared               bool     `arg:"--shared"`               // Displays shared VGs without active lvmlockd.
 }
 
-// LVCreateOptions provides options for creating LVs.
-type LVCreateOptions struct {
+// CreateLVOptions provides options for creating LVs (lvcreate).
+type CreateLVOptions struct {
 	CommonOptions
 	LVName                 string   `arg:"--name"`                   // Name of the LV to create.
 	VGName                 string   `arg:"0"`                        // Name of the VG to create the LV in.
@@ -576,8 +576,8 @@ type LVCreateOptions struct {
 	Deduplication          *YesNo   `arg:"--deduplication"`          // Whether to enable deduplication.
 }
 
-// LVChangeOptions provides options for modifying LVs.
-type LVChangeOptions struct {
+// UpdateLVOptions provides options for modifying LVs (lvchange).
+type UpdateLVOptions struct {
 	CommonOptions
 	Name                 string   `arg:"0"`                      // Name of the LV to modify.
 	Force                bool     `arg:"--force"`                // Override checks and protections.
@@ -625,8 +625,8 @@ type LVChangeOptions struct {
 	ReadOnly             bool     `arg:"--readonly"`             // Read metadata without locks.
 }
 
-// LVRemoveOptions provides options for removing LVs.
-type LVRemoveOptions struct {
+// RemoveLVOptions provides options for removing LVs (lvremove).
+type RemoveLVOptions struct {
 	CommonOptions
 	Name       string `arg:"0"`            // Name of the LV to remove.
 	AutoBackup *YesNo `arg:"--autobackup"` // Auto backup metadata after changes.
@@ -636,8 +636,8 @@ type LVRemoveOptions struct {
 	NoUdevSync bool   `arg:"--noudevsync"` // Ignore udev notifications.
 }
 
-// LVConvertOptions provides options for changing LV layouts.
-type LVConvertOptions struct {
+// ConvertLVLayoutOptions provides options for changing LV layouts (lvconvert).
+type ConvertLVLayoutOptions struct {
 	CommonOptions
 	Name                   string   `arg:"0"`                        // Name of the LV to convert.
 	NewName                string   `arg:"--name"`                   // The name of the new LV. When unspecified one is generated.
@@ -697,8 +697,8 @@ type LVConvertOptions struct {
 	Replace                string   `arg:"--replace"`                // Replace a specific PV in a raid LV with another PV.
 }
 
-// LVExtendOptions provides options for adding space to an LV.
-type LVExtendOptions struct {
+// ExtendLVOptions provides options for adding space to an LV (lvextend).
+type ExtendLVOptions struct {
 	CommonOptions
 	Name             string   `arg:"0"`                  // Name of the LV to extend.
 	PVNames          []string `arg:"1"`                  // Specific PVs to extend onto.
@@ -718,8 +718,8 @@ type LVExtendOptions struct {
 	NoFsck           bool     `arg:"--nofsck"`           // Skip performing fsck before resizing the filesystem.
 }
 
-// LVReduceOptions provides options for reducing the size of an LV.
-type LVReduceOptions struct {
+// ReduceLVOptions provides options for reducing the size of an LV (lvreduce).
+type ReduceLVOptions struct {
 	CommonOptions
 	Name       string `arg:"0"`            // Name of the LV to reduce.
 	AutoBackup *YesNo `arg:"--autobackup"` // Auto backup metadata after changes.
@@ -731,18 +731,13 @@ type LVReduceOptions struct {
 	NoFsck     bool   `arg:"--nofsck"`     // Skip performing fsck before resizing the filesystem.
 }
 
-// LVRenameOptions provides options for renaming LVs.
-type LVRenameOptions struct {
+// RenameLVOptions provides options for renaming LVs (lvrename).
+type RenameLVOptions struct {
 	CommonOptions
 	From       string `arg:"0"`            // Name of the LV to rename.
 	To         string `arg:"1"`            // New name for the LV.
 	AutoBackup *YesNo `arg:"--autobackup"` // Auto backup metadata after changes.
 	NoUdevSync bool   `arg:"--noudevsync"` // Ignore udev notifications.
-}
-
-// LVResizeOptions provides options for resizing LVs.
-type LVResizeOptions struct {
-	CommonOptions
 }
 
 // CommonOptions holds configurations for LVM2 commands.

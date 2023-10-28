@@ -27,12 +27,12 @@ import (
 
 type Client struct{}
 
-func New() *Client {
+func NewClient() *Client {
 	return &Client{}
 }
 
 // Display attributes of a physical volume/s.
-func (c *Client) PVList(ctx context.Context, opts *PVListOptions) ([]PhysicalVolume, error) {
+func (c *Client) ListPhysicalVolumes(ctx context.Context, opts *ListPVOptions) ([]PhysicalVolume, error) {
 	args := []string{"pvs", "--reportformat=json", "--options=pv_all,vg_name"}
 	if opts != nil {
 		args = append(args, MarshalArgs(opts)...)
@@ -60,7 +60,7 @@ func (c *Client) PVList(ctx context.Context, opts *PVListOptions) ([]PhysicalVol
 }
 
 // Create a new physical volume on a device.
-func (c *Client) PVCreate(ctx context.Context, opts PVCreateOptions) error {
+func (c *Client) CreatePhysicalVolume(ctx context.Context, opts CreatePVOptions) error {
 	args := []string{"pvcreate", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -69,7 +69,7 @@ func (c *Client) PVCreate(ctx context.Context, opts PVCreateOptions) error {
 }
 
 // Change physical volume attributes.
-func (c *Client) PVChange(ctx context.Context, opts PVChangeOptions) error {
+func (c *Client) UpdatePhysicalVolume(ctx context.Context, opts UpdatePVOptions) error {
 	args := []string{"pvchange", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -78,7 +78,7 @@ func (c *Client) PVChange(ctx context.Context, opts PVChangeOptions) error {
 }
 
 // Remove a physical volume from a device.
-func (c *Client) PVRemove(ctx context.Context, opts PVRemoveOptions) error {
+func (c *Client) RemovePhysicalVolume(ctx context.Context, opts RemovePVOptions) error {
 	args := []string{"pvremove", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -87,7 +87,7 @@ func (c *Client) PVRemove(ctx context.Context, opts PVRemoveOptions) error {
 }
 
 // Check / repair physical volume metadata.
-func (c *Client) PVCheck(ctx context.Context, opts PVCheckOptions) error {
+func (c *Client) CheckPhysicalVolume(ctx context.Context, opts CheckPVOptions) error {
 	args := []string{"pvck", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -96,7 +96,7 @@ func (c *Client) PVCheck(ctx context.Context, opts PVCheckOptions) error {
 }
 
 // Move extents from one physical volume to another.
-func (c *Client) PVMove(ctx context.Context, opts PVMoveOptions) error {
+func (c *Client) MovePhysicalExtents(ctx context.Context, opts MovePEOptions) error {
 	args := []string{"pvmove", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -105,7 +105,7 @@ func (c *Client) PVMove(ctx context.Context, opts PVMoveOptions) error {
 }
 
 // Resize a physical volume.
-func (c *Client) PVResize(ctx context.Context, opts PVResizeOptions) error {
+func (c *Client) ResizePhysicalVolume(ctx context.Context, opts ResizePVOptions) error {
 	args := []string{"pvresize", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -114,7 +114,7 @@ func (c *Client) PVResize(ctx context.Context, opts PVResizeOptions) error {
 }
 
 // Display volume group/s information.
-func (c *Client) VGList(ctx context.Context, opts *VGListOptions) ([]VolumeGroup, error) {
+func (c *Client) ListVolumeGroups(ctx context.Context, opts *ListVGOptions) ([]VolumeGroup, error) {
 	args := []string{"vgs", "--reportformat=json", "--options=vg_all"}
 	if opts != nil {
 		args = append(args, MarshalArgs(opts)...)
@@ -142,7 +142,7 @@ func (c *Client) VGList(ctx context.Context, opts *VGListOptions) ([]VolumeGroup
 }
 
 // Create a new volume group.
-func (c *Client) VGCreate(ctx context.Context, opts VGCreateOptions) error {
+func (c *Client) CreateVolumeGroup(ctx context.Context, opts CreateVGOptions) error {
 	args := []string{"vgcreate", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -151,7 +151,7 @@ func (c *Client) VGCreate(ctx context.Context, opts VGCreateOptions) error {
 }
 
 // Change volume group attributes.
-func (c *Client) VGChange(ctx context.Context, opts VGChangeOptions) error {
+func (c *Client) UpdateVolumeGroup(ctx context.Context, opts UpdateVGOptions) error {
 	args := []string{"vgchange", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -160,7 +160,7 @@ func (c *Client) VGChange(ctx context.Context, opts VGChangeOptions) error {
 }
 
 // Remove a volume group.
-func (c *Client) VGRemove(ctx context.Context, opts VGRemoveOptions) error {
+func (c *Client) RemoveVolumeGroup(ctx context.Context, opts RemoveVGOptions) error {
 	args := []string{"vgremove", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -169,7 +169,7 @@ func (c *Client) VGRemove(ctx context.Context, opts VGRemoveOptions) error {
 }
 
 // Check / repair volume group metadata.
-func (c *Client) VGCheck(ctx context.Context, opts VGCheckOptions) error {
+func (c *Client) CheckVolumeGroup(ctx context.Context, opts CheckVGOptions) error {
 	args := []string{"vgck", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -178,7 +178,7 @@ func (c *Client) VGCheck(ctx context.Context, opts VGCheckOptions) error {
 }
 
 // Unregister a volume group from the system.
-func (c *Client) VGExport(ctx context.Context, opts VGExportOptions) error {
+func (c *Client) ExportVolumeGroup(ctx context.Context, opts ExportVGOptions) error {
 	args := []string{"vgexport", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -187,7 +187,7 @@ func (c *Client) VGExport(ctx context.Context, opts VGExportOptions) error {
 }
 
 // Register a volume group with the system.
-func (c *Client) VGImport(ctx context.Context, opts VGImportOptions) error {
+func (c *Client) ImportVolumeGroup(ctx context.Context, opts ImportVGOptions) error {
 	args := []string{"vgimport", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -196,7 +196,7 @@ func (c *Client) VGImport(ctx context.Context, opts VGImportOptions) error {
 }
 
 // Import a volume group from cloned physical volumes.
-func (c *Client) VGImportClone(ctx context.Context, opts VGImportCloneOptions) error {
+func (c *Client) ImportVolumeGroupFromCloned(ctx context.Context, opts ImportVGFromClonedOptions) error {
 	args := []string{"vgimportclone", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -204,17 +204,8 @@ func (c *Client) VGImportClone(ctx context.Context, opts VGImportCloneOptions) e
 	return err
 }
 
-// Add physical volumes to a volume group.
-func (c *Client) VGExtend(ctx context.Context, opts VGExtendOptions) error {
-	args := []string{"vgextend", "--yes"}
-	args = append(args, MarshalArgs(opts)...)
-
-	_, err := c.run(ctx, args...)
-	return err
-}
-
 // Merge volume groups.
-func (c *Client) VGMerge(ctx context.Context, opts VGMergeOptions) error {
+func (c *Client) MergeVolumeGroups(ctx context.Context, opts MergeVGOptions) error {
 	args := []string{"vgmerge", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -222,8 +213,17 @@ func (c *Client) VGMerge(ctx context.Context, opts VGMergeOptions) error {
 	return err
 }
 
+// Add physical volumes to a volume group.
+func (c *Client) ExtendVolumeGroup(ctx context.Context, opts ExtendVGOptions) error {
+	args := []string{"vgextend", "--yes"}
+	args = append(args, MarshalArgs(opts)...)
+
+	_, err := c.run(ctx, args...)
+	return err
+}
+
 // Remove physical volumes from a volume group.
-func (c *Client) VGReduce(ctx context.Context, opts VGReduceOptions) error {
+func (c *Client) ReduceVolumeGroup(ctx context.Context, opts ReduceVGOptions) error {
 	args := []string{"vgreduce", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -232,7 +232,7 @@ func (c *Client) VGReduce(ctx context.Context, opts VGReduceOptions) error {
 }
 
 // Rename a volume group.
-func (c *Client) VGRename(ctx context.Context, opts VGRenameOptions) error {
+func (c *Client) RenameVolumeGroup(ctx context.Context, opts RenameVGOptions) error {
 	args := []string{"vgrename", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -241,7 +241,7 @@ func (c *Client) VGRename(ctx context.Context, opts VGRenameOptions) error {
 }
 
 // Move physical volumes between volume groups.
-func (c *Client) VGSplit(ctx context.Context, opts VGSplitOptions) error {
+func (c *Client) MovePhysicalVolumes(ctx context.Context, opts MovePVOptions) error {
 	args := []string{"vgsplit", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -250,7 +250,7 @@ func (c *Client) VGSplit(ctx context.Context, opts VGSplitOptions) error {
 }
 
 // Create device files for active logical volumes in the volume group.
-func (c *Client) VGMknodes(ctx context.Context, opts VGMknodesOptions) error {
+func (c *Client) MakeVolumeGroupDeviceNodes(ctx context.Context, opts MakeVGDeviceNodesOptions) error {
 	args := []string{"vgmknodes", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -258,17 +258,8 @@ func (c *Client) VGMknodes(ctx context.Context, opts VGMknodesOptions) error {
 	return err
 }
 
-// Create a new logical volume in a volume group.
-func (c *Client) LVCreate(ctx context.Context, opts LVCreateOptions) error {
-	args := []string{"lvcreate", "--yes"}
-	args = append(args, MarshalArgs(opts)...)
-
-	_, err := c.run(ctx, args...)
-	return err
-}
-
 // Display logical volume/s information.
-func (c *Client) LVList(ctx context.Context, opts *LVListOptions) ([]LogicalVolume, error) {
+func (c *Client) ListLogicalVolumes(ctx context.Context, opts *ListLVOptions) ([]LogicalVolume, error) {
 	args := []string{"lvs", "--reportformat=json", "--options=lv_all,seg_all,vg_name"}
 	if opts != nil {
 		args = append(args, MarshalArgs(opts)...)
@@ -295,8 +286,17 @@ func (c *Client) LVList(ctx context.Context, opts *LVListOptions) ([]LogicalVolu
 	return nil, nil
 }
 
+// Create a new logical volume in a volume group.
+func (c *Client) CreateLogicalVolume(ctx context.Context, opts CreateLVOptions) error {
+	args := []string{"lvcreate", "--yes"}
+	args = append(args, MarshalArgs(opts)...)
+
+	_, err := c.run(ctx, args...)
+	return err
+}
+
 // Change logical volume attributes.
-func (c *Client) LVChange(ctx context.Context, opts LVChangeOptions) error {
+func (c *Client) UpdateLogicalVolume(ctx context.Context, opts UpdateLVOptions) error {
 	args := []string{"lvchange", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -305,7 +305,7 @@ func (c *Client) LVChange(ctx context.Context, opts LVChangeOptions) error {
 }
 
 // Remove a logical volume.
-func (c *Client) LVRemove(ctx context.Context, opts LVRemoveOptions) error {
+func (c *Client) RemoveLogicalVolume(ctx context.Context, opts RemoveLVOptions) error {
 	args := []string{"lvremove", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -314,7 +314,7 @@ func (c *Client) LVRemove(ctx context.Context, opts LVRemoveOptions) error {
 }
 
 // Change logical volume layout.
-func (c *Client) LVConvert(ctx context.Context, opts LVConvertOptions) error {
+func (c *Client) ConvertLogicalVolumeLayout(ctx context.Context, opts ConvertLVLayoutOptions) error {
 	args := []string{"lvconvert", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -323,7 +323,7 @@ func (c *Client) LVConvert(ctx context.Context, opts LVConvertOptions) error {
 }
 
 // Add space to a logical volume.
-func (c *Client) LVExtend(ctx context.Context, opts LVExtendOptions) error {
+func (c *Client) ExtendLogicalVolume(ctx context.Context, opts ExtendLVOptions) error {
 	args := []string{"lvextend", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -332,7 +332,7 @@ func (c *Client) LVExtend(ctx context.Context, opts LVExtendOptions) error {
 }
 
 // Reduce the size of a logical volume.
-func (c *Client) LVReduce(ctx context.Context, opts LVReduceOptions) error {
+func (c *Client) ReduceLogicalVolume(ctx context.Context, opts ReduceLVOptions) error {
 	args := []string{"lvreduce", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 
@@ -341,7 +341,7 @@ func (c *Client) LVReduce(ctx context.Context, opts LVReduceOptions) error {
 }
 
 // Rename a logical volume.
-func (c *Client) LVRename(ctx context.Context, opts LVRenameOptions) error {
+func (c *Client) RenameLogicalVolume(ctx context.Context, opts RenameLVOptions) error {
 	args := []string{"lvrename", "--yes"}
 	args = append(args, MarshalArgs(opts)...)
 

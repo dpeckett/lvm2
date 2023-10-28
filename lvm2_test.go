@@ -33,7 +33,7 @@ func TestClient(t *testing.T) {
 	err := loadNBDModule()
 	require.NoError(t, err)
 
-	c := lvm2.New()
+	c := lvm2.NewClient()
 
 	t.Run("Physical volumes", func(t *testing.T) {
 		t.Log("Creating virtual block device")
@@ -56,12 +56,12 @@ func TestClient(t *testing.T) {
 
 		t.Log("Creating physical volume")
 
-		err = c.PVCreate(ctx, lvm2.PVCreateOptions{
+		err = c.CreatePhysicalVolume(ctx, lvm2.CreatePVOptions{
 			Name: devPath,
 		})
 		require.NoError(t, err, "failed to create PV")
 
-		pvs, err := c.PVList(ctx, &lvm2.PVListOptions{
+		pvs, err := c.ListPhysicalVolumes(ctx, &lvm2.ListPVOptions{
 			Names: []string{devPath},
 		})
 		require.NoError(t, err, "failed to list PVs")
@@ -71,7 +71,7 @@ func TestClient(t *testing.T) {
 
 		t.Log("Changing physical volume UUID")
 
-		err = c.PVChange(ctx, lvm2.PVChangeOptions{
+		err = c.UpdatePhysicalVolume(ctx, lvm2.UpdatePVOptions{
 			Name: devPath,
 			UUID: true,
 		})
@@ -79,13 +79,13 @@ func TestClient(t *testing.T) {
 
 		t.Log("Resizing physical volume")
 
-		err = c.PVResize(ctx, lvm2.PVResizeOptions{
+		err = c.ResizePhysicalVolume(ctx, lvm2.ResizePVOptions{
 			Name:                  devPath,
 			SetPhysicalVolumeSize: "100M",
 		})
 		require.NoError(t, err, "failed to resize PV")
 
-		pvs, err = c.PVList(ctx, &lvm2.PVListOptions{
+		pvs, err = c.ListPhysicalVolumes(ctx, &lvm2.ListPVOptions{
 			Names: []string{devPath},
 		})
 		require.NoError(t, err, "failed to list PVs")
@@ -96,19 +96,19 @@ func TestClient(t *testing.T) {
 
 		t.Log("Checking physical volume")
 
-		err = c.PVCheck(ctx, lvm2.PVCheckOptions{
+		err = c.CheckPhysicalVolume(ctx, lvm2.CheckPVOptions{
 			Name: devPath,
 		})
 		require.NoError(t, err, "failed to check PV")
 
 		t.Log("Removing physical volume")
 
-		err = c.PVRemove(ctx, lvm2.PVRemoveOptions{
+		err = c.RemovePhysicalVolume(ctx, lvm2.RemovePVOptions{
 			Name: devPath,
 		})
 		require.NoError(t, err, "failed to remove PV")
 
-		pvs, err = c.PVList(ctx, &lvm2.PVListOptions{
+		pvs, err = c.ListPhysicalVolumes(ctx, &lvm2.ListPVOptions{
 			Names: []string{devPath},
 		})
 		require.Contains(t, err.Error(), "Failed to find physical volume")
@@ -146,12 +146,12 @@ func TestClient(t *testing.T) {
 
 		t.Log("Creating physical volumes")
 
-		err = c.PVCreate(ctx, lvm2.PVCreateOptions{
+		err = c.CreatePhysicalVolume(ctx, lvm2.CreatePVOptions{
 			Name: firstDevPath,
 		})
 		require.NoError(t, err, "failed to create first PV")
 
-		err = c.PVCreate(ctx, lvm2.PVCreateOptions{
+		err = c.CreatePhysicalVolume(ctx, lvm2.CreatePVOptions{
 			Name: secondDevPath,
 		})
 		require.NoError(t, err, "failed to create second PV")
@@ -161,7 +161,7 @@ func TestClient(t *testing.T) {
 		vgName := strings.ReplaceAll(t.Name()+"_vg", "/", "_")
 		vgTag := strings.ReplaceAll(t.Name(), "/", "_")
 
-		err = c.VGCreate(ctx, lvm2.VGCreateOptions{
+		err = c.CreateVolumeGroup(ctx, lvm2.CreateVGOptions{
 			Name:    vgName,
 			PVNames: []string{firstDevPath},
 			Tags:    []string{vgTag},
@@ -169,17 +169,17 @@ func TestClient(t *testing.T) {
 		require.NoError(t, err, "failed to create VG")
 
 		t.Cleanup(func() {
-			_ = c.VGChange(ctx, lvm2.VGChangeOptions{
+			_ = c.UpdateVolumeGroup(ctx, lvm2.UpdateVGOptions{
 				Name:     vgName,
 				Activate: lvm2.No,
 			})
 
-			_ = c.VGRemove(ctx, lvm2.VGRemoveOptions{
+			_ = c.RemoveVolumeGroup(ctx, lvm2.RemoveVGOptions{
 				Name: vgName,
 			})
 		})
 
-		vgs, err := c.VGList(ctx, &lvm2.VGListOptions{
+		vgs, err := c.ListVolumeGroups(ctx, &lvm2.ListVGOptions{
 			Names: []string{vgName},
 		})
 		require.NoError(t, err, "failed to list VGs")
@@ -190,7 +190,7 @@ func TestClient(t *testing.T) {
 
 		t.Log("Activating volume group")
 
-		err = c.VGChange(ctx, lvm2.VGChangeOptions{
+		err = c.UpdateVolumeGroup(ctx, lvm2.UpdateVGOptions{
 			Name:     vgName,
 			Activate: lvm2.Yes,
 		})
@@ -198,13 +198,13 @@ func TestClient(t *testing.T) {
 
 		t.Log("Adding second physical volume to volume group")
 
-		err = c.VGExtend(ctx, lvm2.VGExtendOptions{
+		err = c.ExtendVolumeGroup(ctx, lvm2.ExtendVGOptions{
 			Name:    vgName,
 			PVNames: []string{secondDevPath},
 		})
 		require.NoError(t, err, "failed to add second PV to VG")
 
-		vgs, err = c.VGList(ctx, &lvm2.VGListOptions{
+		vgs, err = c.ListVolumeGroups(ctx, &lvm2.ListVGOptions{
 			Names: []string{vgName},
 		})
 		require.NoError(t, err, "failed to list VGs")
@@ -216,7 +216,7 @@ func TestClient(t *testing.T) {
 
 		tmpSecondVGName := strings.ReplaceAll(t.Name()+"_tmp", "/", "_")
 
-		err = c.VGSplit(ctx, lvm2.VGSplitOptions{
+		err = c.MovePhysicalVolumes(ctx, lvm2.MovePVOptions{
 			Source:      vgName,
 			Destination: tmpSecondVGName,
 			PVNames:     []string{secondDevPath},
@@ -227,27 +227,27 @@ func TestClient(t *testing.T) {
 
 		secondVGName := strings.ReplaceAll(t.Name()+"_vg2", "/", "_")
 
-		err = c.VGRename(ctx, lvm2.VGRenameOptions{
+		err = c.RenameVolumeGroup(ctx, lvm2.RenameVGOptions{
 			From: tmpSecondVGName,
 			To:   secondVGName,
 		})
 		require.NoError(t, err, "failed to rename VG")
 
 		t.Cleanup(func() {
-			_ = c.VGRemove(ctx, lvm2.VGRemoveOptions{
+			_ = c.RemoveVolumeGroup(ctx, lvm2.RemoveVGOptions{
 				Name: secondVGName,
 			})
 		})
 
 		t.Log("Adding tag to volume group")
 
-		err = c.VGChange(ctx, lvm2.VGChangeOptions{
+		err = c.UpdateVolumeGroup(ctx, lvm2.UpdateVGOptions{
 			Name:    secondVGName,
 			AddTags: []string{vgTag},
 		})
 		require.NoError(t, err, "failed to add tag to VG")
 
-		vgs, err = c.VGList(ctx, &lvm2.VGListOptions{
+		vgs, err = c.ListVolumeGroups(ctx, &lvm2.ListVGOptions{
 			Select: "vg_tags=" + vgTag,
 		})
 		require.NoError(t, err, "failed to list VGs")
@@ -258,13 +258,13 @@ func TestClient(t *testing.T) {
 
 		t.Log("Merging volume groups")
 
-		err = c.VGMerge(ctx, lvm2.VGMergeOptions{
+		err = c.MergeVolumeGroups(ctx, lvm2.MergeVGOptions{
 			Destination: vgName,
 			Source:      secondVGName,
 		})
 		require.NoError(t, err, "failed to merge VGs")
 
-		vgs, err = c.VGList(ctx, &lvm2.VGListOptions{
+		vgs, err = c.ListVolumeGroups(ctx, &lvm2.ListVGOptions{
 			Select: "vg_tags=" + vgTag,
 		})
 		require.NoError(t, err, "failed to list VGs")
@@ -273,7 +273,7 @@ func TestClient(t *testing.T) {
 
 		t.Log("Removing second physical volume from volume group")
 
-		err = c.VGReduce(ctx, lvm2.VGReduceOptions{
+		err = c.ReduceVolumeGroup(ctx, lvm2.ReduceVGOptions{
 			Name: vgName,
 			PVNames: []string{
 				secondDevPath,
@@ -281,7 +281,7 @@ func TestClient(t *testing.T) {
 		})
 		require.NoError(t, err, "failed to remove VG")
 
-		vgs, err = c.VGList(ctx, &lvm2.VGListOptions{
+		vgs, err = c.ListVolumeGroups(ctx, &lvm2.ListVGOptions{
 			Select: "vg_tags=" + vgTag,
 		})
 		require.NoError(t, err, "failed to list VGs")
@@ -290,7 +290,7 @@ func TestClient(t *testing.T) {
 
 		t.Log("Checking volume group")
 
-		err = c.VGCheck(ctx, lvm2.VGCheckOptions{
+		err = c.CheckVolumeGroup(ctx, lvm2.CheckVGOptions{
 			Name:           vgName,
 			UpdateMetadata: true,
 		})
@@ -298,12 +298,12 @@ func TestClient(t *testing.T) {
 
 		t.Log("Removing volume group")
 
-		err = c.VGRemove(ctx, lvm2.VGRemoveOptions{
+		err = c.RemoveVolumeGroup(ctx, lvm2.RemoveVGOptions{
 			Name: vgName,
 		})
 		require.NoError(t, err, "failed to remove VG")
 
-		vgs, err = c.VGList(ctx, &lvm2.VGListOptions{
+		vgs, err = c.ListVolumeGroups(ctx, &lvm2.ListVGOptions{
 			Names: []string{vgName},
 		})
 		require.Contains(t, err.Error(), "not found")
@@ -333,14 +333,14 @@ func TestClient(t *testing.T) {
 
 		t.Log("Creating volume group", vgName)
 
-		err = c.VGCreate(ctx, lvm2.VGCreateOptions{
+		err = c.CreateVolumeGroup(ctx, lvm2.CreateVGOptions{
 			Name:    vgName,
 			PVNames: []string{devPath},
 		})
 		require.NoError(t, err, "failed to create VG")
 
 		t.Cleanup(func() {
-			err := c.VGChange(ctx, lvm2.VGChangeOptions{
+			err := c.UpdateVolumeGroup(ctx, lvm2.UpdateVGOptions{
 				Name:     vgName,
 				Activate: lvm2.No,
 			})
@@ -351,7 +351,7 @@ func TestClient(t *testing.T) {
 
 		t.Log("Creating logical volume", lvName)
 
-		err = c.LVCreate(ctx, lvm2.LVCreateOptions{
+		err = c.CreateLogicalVolume(ctx, lvm2.CreateLVOptions{
 			LVName:   lvName,
 			VGName:   vgName,
 			Size:     "100M",
@@ -359,7 +359,7 @@ func TestClient(t *testing.T) {
 		})
 		require.NoError(t, err, "failed to create LV")
 
-		lvs, err := c.LVList(ctx, &lvm2.LVListOptions{
+		lvs, err := c.ListLogicalVolumes(ctx, &lvm2.ListLVOptions{
 			Names: []string{
 				fmt.Sprintf("%s/%s", vgName, lvName),
 			},
@@ -373,13 +373,13 @@ func TestClient(t *testing.T) {
 
 		t.Log("Resizing logical volume")
 
-		err = c.LVExtend(ctx, lvm2.LVExtendOptions{
+		err = c.ExtendLogicalVolume(ctx, lvm2.ExtendLVOptions{
 			Name: fmt.Sprintf("%s/%s", vgName, lvName),
 			Size: "200M",
 		})
 		require.NoError(t, err, "failed to extend LV")
 
-		lvs, err = c.LVList(ctx, &lvm2.LVListOptions{
+		lvs, err = c.ListLogicalVolumes(ctx, &lvm2.ListLVOptions{
 			Names: []string{
 				fmt.Sprintf("%s/%s", vgName, lvName),
 			},
@@ -389,13 +389,13 @@ func TestClient(t *testing.T) {
 		require.Len(t, lvs, 1)
 		require.Equal(t, "200.00m", lvs[0].Size)
 
-		err = c.LVReduce(ctx, lvm2.LVReduceOptions{
+		err = c.ReduceLogicalVolume(ctx, lvm2.ReduceLVOptions{
 			Name: fmt.Sprintf("%s/%s", vgName, lvName),
 			Size: "128M",
 		})
 		require.NoError(t, err, "failed to reduce LV")
 
-		lvs, err = c.LVList(ctx, &lvm2.LVListOptions{
+		lvs, err = c.ListLogicalVolumes(ctx, &lvm2.ListLVOptions{
 			Names: []string{
 				fmt.Sprintf("%s/%s", vgName, lvName),
 			},
@@ -407,7 +407,7 @@ func TestClient(t *testing.T) {
 
 		t.Log("Renaming and activating logical volume")
 
-		err = c.LVRename(ctx, lvm2.LVRenameOptions{
+		err = c.RenameLogicalVolume(ctx, lvm2.RenameLVOptions{
 			From: fmt.Sprintf("%s/%s", vgName, lvName),
 			To:   lvName + "_2",
 		})
@@ -415,13 +415,13 @@ func TestClient(t *testing.T) {
 
 		lvName += "_2"
 
-		err = c.LVChange(ctx, lvm2.LVChangeOptions{
+		err = c.UpdateLogicalVolume(ctx, lvm2.UpdateLVOptions{
 			Name:     fmt.Sprintf("%s/%s", vgName, lvName),
 			Activate: lvm2.Yes,
 		})
 		require.NoError(t, err, "failed to activate LV")
 
-		lvs, err = c.LVList(ctx, &lvm2.LVListOptions{
+		lvs, err = c.ListLogicalVolumes(ctx, &lvm2.ListLVOptions{
 			Names: []string{
 				fmt.Sprintf("%s/%s", vgName, lvName),
 			},
@@ -450,12 +450,12 @@ func TestClient(t *testing.T) {
 
 		t.Log("Adding second physical volume to volume group")
 
-		err = c.PVCreate(ctx, lvm2.PVCreateOptions{
+		err = c.CreatePhysicalVolume(ctx, lvm2.CreatePVOptions{
 			Name: secondDevPath,
 		})
 		require.NoError(t, err, "failed to create second PV")
 
-		err = c.VGExtend(ctx, lvm2.VGExtendOptions{
+		err = c.ExtendVolumeGroup(ctx, lvm2.ExtendVGOptions{
 			Name:    vgName,
 			PVNames: []string{secondDevPath},
 		})
@@ -463,14 +463,14 @@ func TestClient(t *testing.T) {
 
 		t.Log("Converting logical volume to RAID1")
 
-		err = c.LVConvert(ctx, lvm2.LVConvertOptions{
+		err = c.ConvertLogicalVolumeLayout(ctx, lvm2.ConvertLVLayoutOptions{
 			Name:    fmt.Sprintf("%s/%s", vgName, lvName),
 			Type:    "raid1",
 			Mirrors: lvm2.PtrTo(1),
 		})
 		require.NoError(t, err, "failed to convert LV to RAID1")
 
-		lvs, err = c.LVList(ctx, &lvm2.LVListOptions{
+		lvs, err = c.ListLogicalVolumes(ctx, &lvm2.ListLVOptions{
 			Names: []string{
 				fmt.Sprintf("%s/%s", vgName, lvName),
 			},
@@ -482,7 +482,7 @@ func TestClient(t *testing.T) {
 
 		t.Log("Removing second physical volume from volume group")
 
-		err = c.LVRemove(ctx, lvm2.LVRemoveOptions{
+		err = c.RemoveLogicalVolume(ctx, lvm2.RemoveLVOptions{
 			Name: fmt.Sprintf("%s/%s", vgName, lvName),
 		})
 		require.NoError(t, err, "failed to remove logical volume")

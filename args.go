@@ -10,7 +10,7 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * WITHOUT WARRANTIES OR CONDITIONS OF AintNY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
@@ -28,6 +28,9 @@ type TextMarshaler interface {
 	MarshalText() string
 }
 
+// MarshalArgs marshals a struct into a slice of strings suitable for passing to
+// a command line program. It's a very naive implementation that only supports
+// a limited set of types.
 func MarshalArgs(opts any) []string {
 	var args []string
 	var posArgs = make(map[int]string)
@@ -146,6 +149,7 @@ func MarshalArgs(opts any) []string {
 	return append(args, orderedPosArgs...)
 }
 
+// YesNo is a boolean type that marshals to "y" or "n".
 type YesNo bool
 
 var Yes = PtrTo(YesNo(true))
