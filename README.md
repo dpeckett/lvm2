@@ -1,6 +1,6 @@
 # lvm2
 
-A Go library for working with [LVM2](https://sourceware.org/lvm2).
+A Go wrapper for working with [LVM2](https://sourceware.org/lvm2).
 
 ## Usage
 
