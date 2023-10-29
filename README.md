@@ -32,3 +32,9 @@ func main() {
     }
 }
 ```
+
+## Contributing
+
+Pull requests are more than welcome. 
+
+The LVM2 project has a huge surface area and I'm sure I've missed things. If you find a bug or something that is missing please open an issue or submit a pull request.

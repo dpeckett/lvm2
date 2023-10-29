@@ -25,10 +25,21 @@ import (
 	"os/exec"
 )
 
-type Client struct{}
+type Client struct {
+	lvmPath string
+}
 
-func NewClient() *Client {
-	return &Client{}
+// Construct a new lvm2 client.
+func NewClient(opts ...ClientOption) *Client {
+	c := &Client{
+		lvmPath: "/sbin/lvm",
+	}
+
+	for _, opt := range opts {
+		opt(c)
+	}
+
+	return c
 }
 
 // Display attributes of a physical volume/s.
@@ -350,7 +361,7 @@ func (c *Client) RenameLogicalVolume(ctx context.Context, opts RenameLVOptions) 
 }
 
 func (c *Client) run(ctx context.Context, args ...string) ([]byte, error) {
-	cmd := exec.CommandContext(ctx, "/sbin/lvm", args...)
+	cmd := exec.CommandContext(ctx, c.lvmPath, args...)
 
 	var out bytes.Buffer
 	var errOut bytes.Buffer
