@@ -352,7 +352,7 @@ func TestClient(t *testing.T) {
 		t.Log("Creating logical volume", lvName)
 
 		err = c.CreateLogicalVolume(ctx, lvm2.CreateLVOptions{
-			LVName:   lvName,
+			Name:     lvName,
 			VGName:   vgName,
 			Size:     "100M",
 			Activate: lvm2.No,

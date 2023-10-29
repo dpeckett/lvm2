@@ -564,7 +564,7 @@ type ListLVOptions struct {
 // CreateLVOptions provides options for creating LVs (lvcreate).
 type CreateLVOptions struct {
 	CommonOptions
-	LVName                 string   `arg:"--name"`                   // Name of the LV to create.
+	Name                   string   `arg:"--name"`                   // Name of the LV to create.
 	VGName                 string   `arg:"0"`                        // Name of the VG to create the LV in.
 	Activate               *YesNo   `arg:"--activate"`               // Activate the LV.
 	AutoBackup             *YesNo   `arg:"--autobackup"`             // Auto backup metadata after changes.
