@@ -63,6 +63,25 @@ func (i *IntString) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// YesNo is a boolean type that marshals to "y" or "n".
+type YesNo bool
+
+var (
+	Yes = PtrTo(YesNo(true))
+	No  = PtrTo(YesNo(false))
+)
+
+func (yn *YesNo) MarshalArg() string {
+	if *yn {
+		return "y"
+	}
+	return "n"
+}
+
+func PtrTo[T any](v T) *T {
+	return &v
+}
+
 // PhysicalVolume represents an LVM2 Physical Volume (PV).
 type PhysicalVolume struct {
 	Format                 string     `json:"pv_fmt"`            // Type of metadata.
@@ -99,89 +118,89 @@ type PhysicalVolume struct {
 // ListPVOptions provides options for listing PVs (pvs).
 type ListPVOptions struct {
 	CommonOptions
-	Names                []string `arg:"0"`                      // Specific PVs to display.
-	All                  bool     `arg:"--all"`                  // Display devices not initialized by LVM.
-	Select               string   `arg:"--select"`               // Filters objects based on criteria.
-	Foreign              bool     `arg:"--foreign"`              // Lists foreign VGs.
-	IgnoreLockingFailure bool     `arg:"--ignorelockingfailure"` // Whether to proceed in read-only mode after lock failures.
-	ReadOnly             bool     `arg:"--readonly"`             // Read metadata without locks.
-	Shared               bool     `arg:"--shared"`               // Displays shared VGs without active lvmlockd.
+	Names                []string `arg:"0"`                    // Specific PVs to display.
+	All                  bool     `arg:"all"`                  // Display devices not initialized by LVM.
+	Select               string   `arg:"select"`               // Filters objects based on criteria.
+	Foreign              bool     `arg:"foreign"`              // Lists foreign VGs.
+	IgnoreLockingFailure bool     `arg:"ignorelockingfailure"` // Whether to proceed in read-only mode after lock failures.
+	ReadOnly             bool     `arg:"readonly"`             // Read metadata without locks.
+	Shared               bool     `arg:"shared"`               // Displays shared VGs without active lvmlockd.
 }
 
 // CreatePVOptions provides options for creating PVs (pvcreate).
 type CreatePVOptions struct {
 	CommonOptions
-	Name                  string `arg:"0"`                       // Device or PV to create.
-	Force                 bool   `arg:"--force"`                 // Override checks and protections.
-	UUID                  string `arg:"--uuid"`                  // Specific UUID for the device.
-	Zero                  *YesNo `arg:"--zero"`                  // Wipe first 4 sectors of the device unless RestoreFile or UUID is given.
-	DataAlignment         string `arg:"--dataalignment"`         // Align PV data's start, may be shifted by DataAlignmentOffset.
-	DataAlignmentOffset   string `arg:"--dataalignmentoffset"`   // Additional shift for PV data's start.
-	BootloaderAreaSize    string `arg:"--bootloaderareasize"`    // Reserved space for the bootloader.
-	LabelSector           *int   `arg:"--labelsector"`           // Sector for the LVM2 identifier.
-	MetadataCopies        *int   `arg:"--pvmetadatacopies"`      // Number of metadata areas on a PV.
-	MetadataSize          string `arg:"--metadatasize"`          // Space for each VG metadata area.
-	MetadataIgnore        *YesNo `arg:"--metadataignore"`        // If set, metadata won't be stored on the PV.
-	NoRestoreFile         bool   `arg:"--norestorefile"`         // Specify UUID without a metadata backup.
-	SetPhysicalVolumeSize string `arg:"--setphysicalvolumesize"` // Manually set the PV size.
-	RestoreFile           string `arg:"--restorefile"`           // Align physical extents based on file's content with UUID.
+	Name                  string `arg:"0"`                     // Device or PV to create.
+	Force                 bool   `arg:"force"`                 // Override checks and protections.
+	UUID                  string `arg:"uuid"`                  // Specific UUID for the device.
+	Zero                  *YesNo `arg:"zero"`                  // Wipe first 4 sectors of the device unless RestoreFile or UUID is given.
+	DataAlignment         string `arg:"dataalignment"`         // Align PV data's start, may be shifted by DataAlignmentOffset.
+	DataAlignmentOffset   string `arg:"dataalignmentoffset"`   // Additional shift for PV data's start.
+	BootloaderAreaSize    string `arg:"bootloaderareasize"`    // Reserved space for the bootloader.
+	LabelSector           *int   `arg:"labelsector"`           // Sector for the LVM2 identifier.
+	MetadataCopies        *int   `arg:"pvmetadatacopies"`      // Number of metadata areas on a PV.
+	MetadataSize          string `arg:"metadatasize"`          // Space for each VG metadata area.
+	MetadataIgnore        *YesNo `arg:"metadataignore"`        // If set, metadata won't be stored on the PV.
+	NoRestoreFile         bool   `arg:"norestorefile"`         // Specify UUID without a metadata backup.
+	SetPhysicalVolumeSize string `arg:"setphysicalvolumesize"` // Manually set the PV size.
+	RestoreFile           string `arg:"restorefile"`           // Align physical extents based on file's content with UUID.
 }
 
 // UpdatePVOptions provides options to modify PVs (pvchange).
 type UpdatePVOptions struct {
 	CommonOptions
-	Name           string   `arg:"0"`                // Device or PV to modify.
-	Force          bool     `arg:"--force"`          // Override checks and protections.
-	AutoBackup     *YesNo   `arg:"--autobackup"`     // Auto backup metadata after changes.
-	All            bool     `arg:"--all"`            // Modify all visible PVs.
-	Allocatable    *YesNo   `arg:"--allocatable"`    // Toggle physical extents allocation.
-	UUID           bool     `arg:"--uuid"`           // Generate a new UUID for the PV.
-	AddTags        []string `arg:"--addtag"`         // Add tag/s to the PV.
-	DelTags        []string `arg:"--deltag"`         // Remove tag/s from the PV.
-	MetadataIgnore *YesNo   `arg:"--metadataignore"` // If set, metadata won't be stored on the PV.
-	Select         string   `arg:"--select"`         // Filter objects based on criteria.
+	Name           string   `arg:"0"`              // Device or PV to modify.
+	Force          bool     `arg:"force"`          // Override checks and protections.
+	AutoBackup     *YesNo   `arg:"autobackup"`     // Auto backup metadata after changes.
+	All            bool     `arg:"all"`            // Modify all visible PVs.
+	Allocatable    *YesNo   `arg:"allocatable"`    // Toggle physical extents allocation.
+	UUID           bool     `arg:"uuid"`           // Generate a new UUID for the PV.
+	AddTags        []string `arg:"addtag"`         // Add tag/s to the PV.
+	DelTags        []string `arg:"deltag"`         // Remove tag/s from the PV.
+	MetadataIgnore *YesNo   `arg:"metadataignore"` // If set, metadata won't be stored on the PV.
+	Select         string   `arg:"select"`         // Filter objects based on criteria.
 }
 
 // RemovePVOptions provides options for removing PVs (pvremove).
 type RemovePVOptions struct {
 	CommonOptions
-	Name  string `arg:"0"`       // Device or PV to remove.
-	Force bool   `arg:"--force"` // Overrides checks and protections.
+	Name  string `arg:"0"`     // Device or PV to remove.
+	Force bool   `arg:"force"` // Overrides checks and protections.
 }
 
 // CheckPVOptions provides options for checking PVs (pvck).
 type CheckPVOptions struct {
 	CommonOptions
-	Name             string   `arg:"0"`                  // Device or PV to check.
-	Dump             string   `arg:"--dump"`             // Which header or metadata to dump.
-	File             string   `arg:"--file"`             // Metadata file to read or write.
-	Repair           bool     `arg:"--repair"`           // Repair headers and metadata.
-	RepairType       string   `arg:"--repairtype"`       // Repair type.
-	LabelSector      *int     `arg:"--labelsector"`      // Sector for the LVM2 identifier.
-	PVMetadataCopies *int     `arg:"--pvmetadatacopies"` // Number of metadata areas on a PV.
-	Settings         []string `arg:"--settings"`         // Command specific settings in `key=value` format.
+	Name             string   `arg:"0"`                // Device or PV to check.
+	Dump             string   `arg:"dump"`             // Which header or metadata to dump.
+	File             string   `arg:"file"`             // Metadata file to read or write.
+	Repair           bool     `arg:"repair"`           // Repair headers and metadata.
+	RepairType       string   `arg:"repairtype"`       // Repair type.
+	LabelSector      *int     `arg:"labelsector"`      // Sector for the LVM2 identifier.
+	PVMetadataCopies *int     `arg:"pvmetadatacopies"` // Number of metadata areas on a PV.
+	Settings         []string `arg:"settings"`         // Command specific settings in `key=value` format.
 }
 
 // MovePEOptions provides options for moving PVs (pvmove).
 type MovePEOptions struct {
 	CommonOptions
-	Source      string   `arg:"0"`            // Device or PV to move.
-	Destination []string `arg:"1"`            // Device or PV to move to.
-	LVName      string   `arg:"--name"`       // Move only the extents belonging to the LV.
-	AutoBackup  *YesNo   `arg:"--autobackup"` // Auto backup metadata after changes.
-	Alloc       string   `arg:"--alloc"`      // Allocation policy for Physical Extents.
-	Abort       bool     `arg:"--abort"`      // Abort any PV move operations in progress.
-	Atomic      bool     `arg:"--atomic"`     // Atomic migration with mirrored temp LV; if interrupted, data remains on source PV.
-	Background  bool     `arg:"--background"` // Move extents in the background.
-	Interval    *int     `arg:"--interval"`   // Report progress at regular intervals.
-	NoUdevSync  bool     `arg:"--noudevsync"` // Allow operations to proceed without waiting for udev notifications.
+	Source      string   `arg:"0"`          // Device or PV to move.
+	Destination []string `arg:"1"`          // Device or PV to move to.
+	LVName      string   `arg:"name"`       // Move only the extents belonging to the LV.
+	AutoBackup  *YesNo   `arg:"autobackup"` // Auto backup metadata after changes.
+	Alloc       string   `arg:"alloc"`      // Allocation policy for Physical Extents.
+	Abort       bool     `arg:"abort"`      // Abort any PV move operations in progress.
+	Atomic      bool     `arg:"atomic"`     // Atomic migration with mirrored temp LV; if interrupted, data remains on source PV.
+	Background  bool     `arg:"background"` // Move extents in the background.
+	Interval    *int     `arg:"interval"`   // Report progress at regular intervals.
+	NoUdevSync  bool     `arg:"noudevsync"` // Allow operations to proceed without waiting for udev notifications.
 }
 
 // ResizePVOptions provides options for resizing PVs (pvresize).
 type ResizePVOptions struct {
 	CommonOptions
-	Name                  string `arg:"0"`                       // Device or PV to resize.
-	SetPhysicalVolumeSize string `arg:"--setphysicalvolumesize"` // Manually set the PV size.
+	Name                  string `arg:"0"`                     // Device or PV to resize.
+	SetPhysicalVolumeSize string `arg:"setphysicalvolumesize"` // Manually set the PV size.
 }
 
 // VolumeGroup represents an LVM2 Volume Group (VG).
@@ -225,187 +244,187 @@ type VolumeGroup struct {
 // ListVGOptions provides options for listing VGs (vgs).
 type ListVGOptions struct {
 	CommonOptions
-	Names                []string `arg:"0"`                      // Specific VGs to display.
-	Select               string   `arg:"--select"`               // Filters objects based on criteria.
-	Foreign              bool     `arg:"--foreign"`              // Lists foreign VGs.
-	IgnoreLockingFailure bool     `arg:"--ignorelockingfailure"` // Whether to proceed in read-only mode after lock failures.
-	ReadOnly             bool     `arg:"--readonly"`             // Read metadata without locks.
-	Shared               bool     `arg:"--shared"`               // Displays shared VGs without active lvmlockd.
+	Names                []string `arg:"0"`                    // Specific VGs to display.
+	Select               string   `arg:"select"`               // Filters objects based on criteria.
+	Foreign              bool     `arg:"foreign"`              // Lists foreign VGs.
+	IgnoreLockingFailure bool     `arg:"ignorelockingfailure"` // Whether to proceed in read-only mode after lock failures.
+	ReadOnly             bool     `arg:"readonly"`             // Read metadata without locks.
+	Shared               bool     `arg:"shared"`               // Displays shared VGs without active lvmlockd.
 }
 
 // CreateVGOptions provides options for creating VGs (vgcreate).
 type CreateVGOptions struct {
 	CommonOptions
-	Name                string   `arg:"0"`                     // Name of the VG to create.
-	PVNames             []string `arg:"1"`                     // List of PVs to add to the VG.
-	Force               bool     `arg:"--force"`               // Overrides checks and protections.
-	AutoBackup          *YesNo   `arg:"--autobackup"`          // Auto backup metadata after changes.
-	MaxLogicalVolumes   *int     `arg:"--maxlogicalvolumes"`   // Max number of LVs allowed in a VG.
-	MaxPhysicalVolumes  *int     `arg:"--maxphysicalvolumes"`  // Max number of PVs that can belong to the VG.
-	PhysicalExtentSize  string   `arg:"--physicalextentsize"`  // Extent size of PVs in the group.
-	Zero                *YesNo   `arg:"--zero"`                // Wipe first 4 sectors of the device.
-	Tags                []string `arg:"--addtag"`              // Tags to add to the VG.
-	Alloc               string   `arg:"--alloc"`               // Allocation policy for Physical Extents.
-	LabelSector         *int     `arg:"--labelsector"`         // Sector for the LVM2 identifier.
-	MetadataSize        string   `arg:"--metadatasize"`        // Space for each VG metadata area.
-	PVMetadataCopies    *int     `arg:"--pvmetadatacopies"`    // Number of metadata areas on a PV.
-	VGMetadataCopies    string   `arg:"--vgmetadatacopies"`    // Number of copies of VG metadata.
-	DataAlignment       string   `arg:"--dataalignment"`       // Align PV data's start, may be shifted by DataAlignmentOffset.
-	DataAlignmentOffset string   `arg:"--dataalignmentoffset"` // Additional shift for PV data's start.
-	Shared              bool     `arg:"--shared"`              // If set, VG is shared across multiple hosts using lvmlockd.
-	SystemID            string   `arg:"--systemid"`            // Specific system ID for the new VG.
-	LockType            string   `arg:"--locktype"`            // Directly specifies the VG lock type.
-	SetAutoActivation   *YesNo   `arg:"--setautoactivation"`   // Enable autoactivation for the VG.
+	Name                string   `arg:"0"`                   // Name of the VG to create.
+	PVNames             []string `arg:"1"`                   // List of PVs to add to the VG.
+	Force               bool     `arg:"force"`               // Overrides checks and protections.
+	AutoBackup          *YesNo   `arg:"autobackup"`          // Auto backup metadata after changes.
+	MaxLogicalVolumes   *int     `arg:"maxlogicalvolumes"`   // Max number of LVs allowed in a VG.
+	MaxPhysicalVolumes  *int     `arg:"maxphysicalvolumes"`  // Max number of PVs that can belong to the VG.
+	PhysicalExtentSize  string   `arg:"physicalextentsize"`  // Extent size of PVs in the group.
+	Zero                *YesNo   `arg:"zero"`                // Wipe first 4 sectors of the device.
+	Tags                []string `arg:"addtag"`              // Tags to add to the VG.
+	Alloc               string   `arg:"alloc"`               // Allocation policy for Physical Extents.
+	LabelSector         *int     `arg:"labelsector"`         // Sector for the LVM2 identifier.
+	MetadataSize        string   `arg:"metadatasize"`        // Space for each VG metadata area.
+	PVMetadataCopies    *int     `arg:"pvmetadatacopies"`    // Number of metadata areas on a PV.
+	VGMetadataCopies    string   `arg:"vgmetadatacopies"`    // Number of copies of VG metadata.
+	DataAlignment       string   `arg:"dataalignment"`       // Align PV data's start, may be shifted by DataAlignmentOffset.
+	DataAlignmentOffset string   `arg:"dataalignmentoffset"` // Additional shift for PV data's start.
+	Shared              bool     `arg:"shared"`              // If set, VG is shared across multiple hosts using lvmlockd.
+	SystemID            string   `arg:"systemid"`            // Specific system ID for the new VG.
+	LockType            string   `arg:"locktype"`            // Directly specifies the VG lock type.
+	SetAutoActivation   *YesNo   `arg:"setautoactivation"`   // Enable autoactivation for the VG.
 }
 
 // UpdateVGOptions provides options for modifying VGs (vgchange).
 type UpdateVGOptions struct {
 	CommonOptions
-	Name                 string   `arg:"0"`                      // Name of the VG to modify.
-	MaxLogicalVolumes    *int     `arg:"--logicalvolume"`        // Max number of LVs allowed in a VG.
-	MaxPhysicalVolumes   *int     `arg:"--maxphysicalvolumes"`   // Max number of PVs that can belong to the VG.
-	UUID                 bool     `arg:"--uuid"`                 // Generate a new UUID for the VG.
-	PhysicalExtentSize   string   `arg:"--physicalextentsize"`   // Extent size of PVs in the group.
-	Resizeable           *YesNo   `arg:"--resizeable"`           // Toggle whether PVs can be added or removed.
-	AddTags              []string `arg:"--addtag"`               // Add tag/s to the VG.
-	DelTags              []string `arg:"--deltag"`               // Remove tag/s from the VG.
-	Alloc                string   `arg:"--alloc"`                // Allocation policy for Physical Extents.
-	PVMetadataCopies     *int     `arg:"--pvmetadatacopies"`     // Number of metadata areas on a PV.
-	VGMetadataCopies     string   `arg:"--vgmetadatacopies"`     // Number of copies of VG metadata.
-	DetachProfile        bool     `arg:"--detachprofile"`        // Detach a metadata profile.
-	SetAutoActivation    *YesNo   `arg:"--setautoactivation"`    // Enable autoactivation for the VG.
-	AutoBackup           *YesNo   `arg:"--autobackup"`           // Auto backup metadata after changes.
-	Select               string   `arg:"--select"`               // Filters objects based on criteria.
-	Force                bool     `arg:"--force"`                // Overrides checks and protections.
-	Poll                 *YesNo   `arg:"--poll"`                 // Resume background operations that were halted due to disruptions.
-	IgnoreMonitoring     bool     `arg:"--ignoremonitoring"`     // Ignore dmeventd monitoring.
-	NoUdevSync           bool     `arg:"--noudevsync"`           // Ignore udev notifications.
-	Monitor              *YesNo   `arg:"--monitor"`              // Toggle monitoring by dmeventd.
-	Refresh              bool     `arg:"--refresh"`              // Refreshes the VG metadata.
-	Activate             *YesNo   `arg:"--activate"`             // Activate the VG.
-	IgnoreActivationSkip bool     `arg:"--ignoreactivationskip"` // Ignore the "activation skip" flag.
-	Partial              bool     `arg:"--partial"`              // Attempt activation with missing Physical Extents.
-	ActivationMode       string   `arg:"--activationmode"`       // Conditions under which a LV can be activated with missing PVs.
-	AutoActivation       string   `arg:"--autoactivation"`       // Activation should occur automatically in response to specific events.
-	LockType             string   `arg:"--locktype"`             // Directly specifies the VG lock type.
-	LockStart            bool     `arg:"--lockstart"`            // Start the lockspace of a shared VG in lvmlockd.
-	LockStop             bool     `arg:"--lockstop"`             // Stop the lockspace of a shared VG in lvmlockd.
-	SysInit              bool     `arg:"--sysinit"`              // Indicates that the command is being invoked from early system init scripts.
-	IgnoreLockingFailure bool     `arg:"--ignorelockingfailure"` // Whether to proceed in read-only mode after lock failures.
-	ReadOnly             bool     `arg:"--readonly"`             // Read metadata without locks.
-	SystemID             string   `arg:"--systemid"`             // Changes the system ID of the VG.
+	Name                 string   `arg:"0"`                    // Name of the VG to modify.
+	MaxLogicalVolumes    *int     `arg:"logicalvolume"`        // Max number of LVs allowed in a VG.
+	MaxPhysicalVolumes   *int     `arg:"maxphysicalvolumes"`   // Max number of PVs that can belong to the VG.
+	UUID                 bool     `arg:"uuid"`                 // Generate a new UUID for the VG.
+	PhysicalExtentSize   string   `arg:"physicalextentsize"`   // Extent size of PVs in the group.
+	Resizeable           *YesNo   `arg:"resizeable"`           // Toggle whether PVs can be added or removed.
+	AddTags              []string `arg:"addtag"`               // Add tag/s to the VG.
+	DelTags              []string `arg:"deltag"`               // Remove tag/s from the VG.
+	Alloc                string   `arg:"alloc"`                // Allocation policy for Physical Extents.
+	PVMetadataCopies     *int     `arg:"pvmetadatacopies"`     // Number of metadata areas on a PV.
+	VGMetadataCopies     string   `arg:"vgmetadatacopies"`     // Number of copies of VG metadata.
+	DetachProfile        bool     `arg:"detachprofile"`        // Detach a metadata profile.
+	SetAutoActivation    *YesNo   `arg:"setautoactivation"`    // Enable autoactivation for the VG.
+	AutoBackup           *YesNo   `arg:"autobackup"`           // Auto backup metadata after changes.
+	Select               string   `arg:"select"`               // Filters objects based on criteria.
+	Force                bool     `arg:"force"`                // Overrides checks and protections.
+	Poll                 *YesNo   `arg:"poll"`                 // Resume background operations that were halted due to disruptions.
+	IgnoreMonitoring     bool     `arg:"ignoremonitoring"`     // Ignore dmeventd monitoring.
+	NoUdevSync           bool     `arg:"noudevsync"`           // Ignore udev notifications.
+	Monitor              *YesNo   `arg:"monitor"`              // Toggle monitoring by dmeventd.
+	Refresh              bool     `arg:"refresh"`              // Refreshes the VG metadata.
+	Activate             *YesNo   `arg:"activate"`             // Activate the VG.
+	IgnoreActivationSkip bool     `arg:"ignoreactivationskip"` // Ignore the "activation skip" flag.
+	Partial              bool     `arg:"partial"`              // Attempt activation with missing Physical Extents.
+	ActivationMode       string   `arg:"activationmode"`       // Conditions under which a LV can be activated with missing PVs.
+	AutoActivation       string   `arg:"autoactivation"`       // Activation should occur automatically in response to specific events.
+	LockType             string   `arg:"locktype"`             // Directly specifies the VG lock type.
+	LockStart            bool     `arg:"lockstart"`            // Start the lockspace of a shared VG in lvmlockd.
+	LockStop             bool     `arg:"lockstop"`             // Stop the lockspace of a shared VG in lvmlockd.
+	SysInit              bool     `arg:"sysinit"`              // Indicates that the command is being invoked from early system init scripts.
+	IgnoreLockingFailure bool     `arg:"ignorelockingfailure"` // Whether to proceed in read-only mode after lock failures.
+	ReadOnly             bool     `arg:"readonly"`             // Read metadata without locks.
+	SystemID             string   `arg:"systemid"`             // Changes the system ID of the VG.
 }
 
 // RemoveVGOptions are options for removing VGs (vgremove).
 type RemoveVGOptions struct {
 	CommonOptions
-	Name       string `arg:"0"`            // Name of the VG to remove.
-	Force      bool   `arg:"--force"`      // Overrides checks and protections.
-	Select     string `arg:"--select"`     // Filters objects based on criteria.
-	NoUdevSync bool   `arg:"--noudevsync"` // Allow operations to proceed without waiting for udev notifications.
+	Name       string `arg:"0"`          // Name of the VG to remove.
+	Force      bool   `arg:"force"`      // Overrides checks and protections.
+	Select     string `arg:"select"`     // Filters objects based on criteria.
+	NoUdevSync bool   `arg:"noudevsync"` // Allow operations to proceed without waiting for udev notifications.
 }
 
 // CheckVGOptions provides options for checking VGs (vgck).
 type CheckVGOptions struct {
 	CommonOptions
-	Name           string `arg:"0"`                // Name of the VG to check.
-	UpdateMetadata bool   `arg:"--updatemetadata"` // Correct VG metadata inconsistencies.
+	Name           string `arg:"0"`              // Name of the VG to check.
+	UpdateMetadata bool   `arg:"updatemetadata"` // Correct VG metadata inconsistencies.
 }
 
 // ExportVGOptions provides options for exporting VGs (vgexport).
 type ExportVGOptions struct {
 	CommonOptions
-	Name   string `arg:"0"`        // Name of the VG to export.
-	Select string `arg:"--select"` // Filters objects based on criteria.
-	All    bool   `arg:"--all"`    // Export all VGs.
+	Name   string `arg:"0"`      // Name of the VG to export.
+	Select string `arg:"select"` // Filters objects based on criteria.
+	All    bool   `arg:"all"`    // Export all VGs.
 }
 
 // ImportVGOptions provides options for importing VGs (vgimport).
 type ImportVGOptions struct {
 	CommonOptions
-	Name   string `arg:"0"`        // Name of the VG to import.
-	Select string `arg:"--select"` // Filters objects based on criteria.
-	All    bool   `arg:"--all"`    // Import all VGs.
-	Force  bool   `arg:"--force"`  // Overrides checks and protections.
+	Name   string `arg:"0"`      // Name of the VG to import.
+	Select string `arg:"select"` // Filters objects based on criteria.
+	All    bool   `arg:"all"`    // Import all VGs.
+	Force  bool   `arg:"force"`  // Overrides checks and protections.
 }
 
 // ImportVGFromClonedOptions provides options for importing VGs from cloned PVs (vgimportclone).
 type ImportVGFromClonedOptions struct {
 	CommonOptions
-	Name          string   `arg:"--name"`          // Name of the VG to import.
-	PVNames       []string `arg:"0"`               // List of PVs to import from.
-	Import        bool     `arg:"--import"`        // Import exported VGs.
-	ImportDevices bool     `arg:"--importdevices"` // Add devices to the devices file.
+	Name          string   `arg:"name"`          // Name of the VG to import.
+	PVNames       []string `arg:"0"`             // List of PVs to import from.
+	Import        bool     `arg:"import"`        // Import exported VGs.
+	ImportDevices bool     `arg:"importdevices"` // Add devices to the devices file.
 }
 
 // MergeVGOptions provides options for merging VGs (vgmerge).
 type MergeVGOptions struct {
 	CommonOptions
-	Destination       string `arg:"0"`                   // Name of the VG to merge into.
-	Source            string `arg:"1"`                   // Name of the VG to merge.
-	AutoBackup        *YesNo `arg:"--autobackup"`        // Auto backup metadata after changes.
-	PoolMetadataSpare *YesNo `arg:"--poolmetadataspare"` // Toggles the automtic creation and management of a spare pool metadata LV in the VG.
+	Destination       string `arg:"0"`                 // Name of the VG to merge into.
+	Source            string `arg:"1"`                 // Name of the VG to merge.
+	AutoBackup        *YesNo `arg:"autobackup"`        // Auto backup metadata after changes.
+	PoolMetadataSpare *YesNo `arg:"poolmetadataspare"` // Toggles the automtic creation and management of a spare pool metadata LV in the VG.
 }
 
 // ExtendVGOptions provides options for extending VGs (vgextend).
 type ExtendVGOptions struct {
 	CommonOptions
-	Name                string   `arg:"0"`                     // Name of the VG to extend.
-	PVNames             []string `arg:"1"`                     // List of PVs to add to the VG.
-	AutoBackup          *YesNo   `arg:"--autobackup"`          // Auto backup metadata after changes.
-	Force               bool     `arg:"--force"`               // Override checks and protections.
-	Zero                *YesNo   `arg:"--zero"`                // Wipe first 4 sectors of the device.
-	LabelSector         *int     `arg:"--labelsector"`         // Sector for the LVM2 identifier.
-	MetadataSize        string   `arg:"--metadatasize"`        // Space for each VG metadata area.
-	PVMetadataCopies    *int     `arg:"--pvmetadatacopies"`    // Number of metadata areas on a PV.
-	MetadataIgnore      *YesNo   `arg:"--metadataignore"`      // If set, metadata won't be stored on the PV.
-	DataAlignment       string   `arg:"--dataalignment"`       // Align PV data's start, may be shifted by DataAlignmentOffset.
-	DataAlignmentOffset string   `arg:"--dataalignmentoffset"` // Additional shift for PV data's start.
-	RestoreMissing      bool     `arg:"--restoremissing"`      // Add a PV back into a VG after the PV was missing and then returned.
+	Name                string   `arg:"0"`                   // Name of the VG to extend.
+	PVNames             []string `arg:"1"`                   // List of PVs to add to the VG.
+	AutoBackup          *YesNo   `arg:"autobackup"`          // Auto backup metadata after changes.
+	Force               bool     `arg:"force"`               // Override checks and protections.
+	Zero                *YesNo   `arg:"zero"`                // Wipe first 4 sectors of the device.
+	LabelSector         *int     `arg:"labelsector"`         // Sector for the LVM2 identifier.
+	MetadataSize        string   `arg:"metadatasize"`        // Space for each VG metadata area.
+	PVMetadataCopies    *int     `arg:"pvmetadatacopies"`    // Number of metadata areas on a PV.
+	MetadataIgnore      *YesNo   `arg:"metadataignore"`      // If set, metadata won't be stored on the PV.
+	DataAlignment       string   `arg:"dataalignment"`       // Align PV data's start, may be shifted by DataAlignmentOffset.
+	DataAlignmentOffset string   `arg:"dataalignmentoffset"` // Additional shift for PV data's start.
+	RestoreMissing      bool     `arg:"restoremissing"`      // Add a PV back into a VG after the PV was missing and then returned.
 }
 
 // ReduceVGOptions provides options for reducing VGs (vgreduce).
 type ReduceVGOptions struct {
 	CommonOptions
-	Name          string   `arg:"0"`               // Name of the VG to reduce.
-	PVNames       []string `arg:"1"`               // List of PVs to remove from the VG.
-	All           bool     `arg:"--all"`           // Remove all unused PVs from the VG.
-	RemoveMissing bool     `arg:"--removemissing"` // Remove missing PVs from the VG.
-	MirrorsOnly   bool     `arg:"--mirrorsonly"`   // Only remove missing PVs from mirror LVs.
-	AutoBackup    *YesNo   `arg:"--autobackup"`    // Auto backup metadata after changes.
-	Force         bool     `arg:"--force"`         // Override checks and protections.
+	Name          string   `arg:"0"`             // Name of the VG to reduce.
+	PVNames       []string `arg:"1"`             // List of PVs to remove from the VG.
+	All           bool     `arg:"all"`           // Remove all unused PVs from the VG.
+	RemoveMissing bool     `arg:"removemissing"` // Remove missing PVs from the VG.
+	MirrorsOnly   bool     `arg:"mirrorsonly"`   // Only remove missing PVs from mirror LVs.
+	AutoBackup    *YesNo   `arg:"autobackup"`    // Auto backup metadata after changes.
+	Force         bool     `arg:"force"`         // Override checks and protections.
 }
 
 // RenameVGOptions provides options for renaming VGs (vgrename).
 type RenameVGOptions struct {
 	CommonOptions
-	From       string `arg:"0"`            // Name of the VG to rename.
-	To         string `arg:"1"`            // New name for the VG.
-	AutoBackup *YesNo `arg:"--autobackup"` // Auto backup metadata after changes.
-	Force      bool   `arg:"--force"`      // Override checks and protections.
+	From       string `arg:"0"`          // Name of the VG to rename.
+	To         string `arg:"1"`          // New name for the VG.
+	AutoBackup *YesNo `arg:"autobackup"` // Auto backup metadata after changes.
+	Force      bool   `arg:"force"`      // Override checks and protections.
 }
 
 // MovePVOptions provides options for moving PVs between VGs (vgsplit).
 type MovePVOptions struct {
 	CommonOptions
-	Source             string   `arg:"0"`                    // Name of the VG to move PVs from.
-	Destination        string   `arg:"1"`                    // Name of the VG to move PVs to.
-	PVNames            []string `arg:"2"`                    // List of PVs to move.
-	LVName             string   `arg:"--name"`               // Move only PVs used by the LV.
-	AutoBackup         *YesNo   `arg:"--autobackup"`         // Auto backup metadata after changes.
-	MaxLogicalVolumes  *int     `arg:"--maxlogicalvolumes"`  // Max number of LVs allowed in a VG.
-	MaxPhysicalVolumes *int     `arg:"--maxphysicalvolumes"` // Max number of PVs that can belong to the VG.
-	Alloc              string   `arg:"--alloc"`              // Allocation policy for Physical Extents.
-	PoolMetadataSpare  *YesNo   `arg:"--poolmetadataspare"`  // Toggles the automtic creation and management of a spare pool metadata LV in the VG.
-	VGMetadataCopies   string   `arg:"--vgmetadatacopies"`   // Number of copies of VG metadata.
+	Source             string   `arg:"0"`                  // Name of the VG to move PVs from.
+	Destination        string   `arg:"1"`                  // Name of the VG to move PVs to.
+	PVNames            []string `arg:"2"`                  // List of PVs to move.
+	LVName             string   `arg:"name"`               // Move only PVs used by the LV.
+	AutoBackup         *YesNo   `arg:"autobackup"`         // Auto backup metadata after changes.
+	MaxLogicalVolumes  *int     `arg:"maxlogicalvolumes"`  // Max number of LVs allowed in a VG.
+	MaxPhysicalVolumes *int     `arg:"maxphysicalvolumes"` // Max number of PVs that can belong to the VG.
+	Alloc              string   `arg:"alloc"`              // Allocation policy for Physical Extents.
+	PoolMetadataSpare  *YesNo   `arg:"poolmetadataspare"`  // Toggles the automtic creation and management of a spare pool metadata LV in the VG.
+	VGMetadataCopies   string   `arg:"vgmetadatacopies"`   // Number of copies of VG metadata.
 }
 
 // MakeVGDeviceNodesOptions provides options for creating LV device nodes for a VG (vgmknodes).
 type MakeVGDeviceNodesOptions struct {
 	CommonOptions
-	Name                 string `arg:"0"`                      // Name of the VG.
-	IgnoreLockingFailure bool   `arg:"--ignorelockingfailure"` // Whether to proceed in read-only mode after lock failures.
-	Refresh              bool   `arg:"--refresh"`              // Refreshes the VG metadata.
+	Name                 string `arg:"0"`                    // Name of the VG.
+	IgnoreLockingFailure bool   `arg:"ignorelockingfailure"` // Whether to proceed in read-only mode after lock failures.
+	Refresh              bool   `arg:"refresh"`              // Refreshes the VG metadata.
 }
 
 // LogicalVolume represents an LVM2 Logical Volume (LV).
@@ -551,249 +570,249 @@ type LogicalVolume struct {
 // ListLVOptions provides options for listing LVs (lvs).
 type ListLVOptions struct {
 	CommonOptions
-	Names                []string `arg:"0"`                      // Specific LVs to display.
-	History              bool     `arg:"--history"`              // Include historical LVs if `record_lvs_history` is enabled.
-	All                  bool     `arg:"--all"`                  // Display information about hidden internal LVs
-	Select               string   `arg:"--select"`               // Filters objects based on criteria.
-	Foreign              bool     `arg:"--foreign"`              // Lists foreign VGs.
-	IgnoreLockingFailure bool     `arg:"--ignorelockingfailure"` // Whether to proceed in read-only mode after lock failures.
-	ReadOnly             bool     `arg:"--readonly"`             // Read metadata without locks.
-	Shared               bool     `arg:"--shared"`               // Displays shared VGs without active lvmlockd.
+	Names                []string `arg:"0"`                    // Specific LVs to display.
+	History              bool     `arg:"history"`              // Include historical LVs if `record_lvs_history` is enabled.
+	All                  bool     `arg:"all"`                  // Display information about hidden internal LVs
+	Select               string   `arg:"select"`               // Filters objects based on criteria.
+	Foreign              bool     `arg:"foreign"`              // Lists foreign VGs.
+	IgnoreLockingFailure bool     `arg:"ignorelockingfailure"` // Whether to proceed in read-only mode after lock failures.
+	ReadOnly             bool     `arg:"readonly"`             // Read metadata without locks.
+	Shared               bool     `arg:"shared"`               // Displays shared VGs without active lvmlockd.
 }
 
 // CreateLVOptions provides options for creating LVs (lvcreate).
 type CreateLVOptions struct {
 	CommonOptions
-	Name                   string   `arg:"--name"`                   // Name of the LV to create.
-	VGName                 string   `arg:"0"`                        // Name of the VG to create the LV in.
-	Activate               *YesNo   `arg:"--activate"`               // Activate the LV.
-	AutoBackup             *YesNo   `arg:"--autobackup"`             // Auto backup metadata after changes.
-	Contiguous             *YesNo   `arg:"--contiguous"`             // Allocate physical extents next to each other.
-	Persistent             *YesNo   `arg:"--persistent"`             // Make the specified block device minor number persistent.
-	Major                  *int     `arg:"--major"`                  // Major number of the LV block device.
-	Minor                  *int     `arg:"--minor"`                  // Minor number of the LV block device.
-	SetActivationSkip      *YesNo   `arg:"--setactivationskip"`      // Set the "activation skip" flag.
-	IgnoreActivationSkip   bool     `arg:"--ignoreactivationskip"`   // Ignore the "activation skip" flag.
-	Permission             string   `arg:"--permission"`             // Access permission, either read only `r` or read and write `rw`.
-	ReadAhead              string   `arg:"--readahead"`              // Read-ahead sector count.
-	WipeSignatures         *YesNo   `arg:"--wipesignatures"`         // Wipe existing filesystem signatures.
-	Zero                   *YesNo   `arg:"--zero"`                   // Zero the first 4KiB of data in the new LV.
-	Tags                   []string `arg:"--addtag"`                 // Tags to add to the LV.
-	Alloc                  string   `arg:"--alloc"`                  // Allocation policy for Physical Extents.
-	SetAutoActivation      *YesNo   `arg:"--setautoactivation"`      // Enable autoactivation for the LV.
-	IgnoreMonitoring       bool     `arg:"--ignoremonitoring"`       // Ignore dmeventd monitoring.
-	NoUdevSync             bool     `arg:"--noudevsync"`             // Ignore udev notifications.
-	Monitor                *YesNo   `arg:"--monitor"`                // Toggle monitoring by dmeventd.
-	NoSync                 bool     `arg:"--nosync"`                 // Skips initial sync for mirror, raid*; useful for empty volumes.
-	Type                   string   `arg:"--type"`                   // Type of LV to create.
-	Size                   string   `arg:"--size"`                   // Size of the LV.
-	Extents                string   `arg:"--extents"`                // Size of the LV in logical extents.
-	Stripes                *int     `arg:"--stripes"`                // Number of stripes in a striped LV.
-	StripeSize             string   `arg:"--stripesize"`             // Amount of data that is written to one device before moving to the next.
-	MirrorLog              string   `arg:"--mirrorlog"`              // The type of mirror log for mirrored LVs.
-	Mirrors                *int     `arg:"--mirrors"`                // Number of mirror images in addition to the original LV image.
-	RegionSize             string   `arg:"--regionsize"`             // Size of each raid or mirror synchronization region.
-	MinRecoveryRate        string   `arg:"--minrecoveryrate"`        // Minimum recovery rate for a RAID LV.
-	MaxRecoveryRate        string   `arg:"--maxrecoveryrate"`        // Maximum recovery rate for a RAID LV.
-	RAIDIntegrity          *YesNo   `arg:"--raidintegrity"`          // Enable or disable data integrity checksums.
-	RAIDIntegrityMode      string   `arg:"--raidintegritymode"`      // Chooses between using a journal (default) or bitmap for integrity checksums.
-	RAIDIntegrityBlockSize *int     `arg:"--raidintegrityblocksize"` // Defines block size for dm-integrity on raid images.
-	Snapshot               bool     `arg:"--snapshot"`               // Create a snapshot.
-	ChunkSize              string   `arg:"--chunksize"`              // Size of chunks in a snapshot, cache pool or thin pool.
-	VirtualSize            string   `arg:"--virtualsize"`            // Virtual size of a new thin LV.
-	Thin                   bool     `arg:"--thin"`                   // Create a thin LV.
-	ThinPool               string   `arg:"--thinpool"`               // Name of the thin pool LV.
-	Discards               string   `arg:"--discards"`               // How the device-mapper thin pool layer in the kernel should handle discards.
-	ErrorWhenFull          *YesNo   `arg:"--errorwhenfull"`          // Whether to fail when the thin pool is full.
-	PoolMetadataSize       string   `arg:"--poolmetadatasize"`       // Specifies the size of the new pool metadata LV.
-	PoolMetadataSpare      *YesNo   `arg:"--poolmetadataspare"`      // Toggles the automtic creation and management of a spare pool metadata LV in the VG.
-	Cache                  bool     `arg:"--cache"`                  // Specifies the command is handling a cache LV or cache pool.
-	CacheDevice            string   `arg:"--cachedevice"`            // The PV to use for the cache.
-	CacheVol               string   `arg:"--cachevol"`               // The name of the cache LV.
-	CacheMode              string   `arg:"--cachemode"`              // When writes to a cache LV should be considered complete.
-	CachePolicy            string   `arg:"--cachepolicy"`            // The cache policy to use.
-	CachePool              string   `arg:"--cachepool"`              // The name of a cache pool.
-	CacheSettings          []string `arg:"--cachesettings"`          // Cache settings in `key=value` format.
-	CacheSize              string   `arg:"--cachesize"`              // Size of the cache LV.
-	VDO                    bool     `arg:"--vdo"`                    // Specifies the command is handling a VDO LV.
-	VDOPool                string   `arg:"--vdopool"`                // The name of the VDO pool LV.
-	VDOSettings            []string `arg:"--vdosettings"`            // VDO settings in `key=value` format.
-	Compression            *YesNo   `arg:"--compression"`            // Whether to enable compression.
-	Deduplication          *YesNo   `arg:"--deduplication"`          // Whether to enable deduplication.
+	Name                   string   `arg:"name"`                   // Name of the LV to create.
+	VGName                 string   `arg:"0"`                      // Name of the VG to create the LV in.
+	Activate               *YesNo   `arg:"activate"`               // Activate the LV.
+	AutoBackup             *YesNo   `arg:"autobackup"`             // Auto backup metadata after changes.
+	Contiguous             *YesNo   `arg:"contiguous"`             // Allocate physical extents next to each other.
+	Persistent             *YesNo   `arg:"persistent"`             // Make the specified block device minor number persistent.
+	Major                  *int     `arg:"major"`                  // Major number of the LV block device.
+	Minor                  *int     `arg:"minor"`                  // Minor number of the LV block device.
+	SetActivationSkip      *YesNo   `arg:"setactivationskip"`      // Set the "activation skip" flag.
+	IgnoreActivationSkip   bool     `arg:"ignoreactivationskip"`   // Ignore the "activation skip" flag.
+	Permission             string   `arg:"permission"`             // Access permission, either read only `r` or read and write `rw`.
+	ReadAhead              string   `arg:"readahead"`              // Read-ahead sector count.
+	WipeSignatures         *YesNo   `arg:"wipesignatures"`         // Wipe existing filesystem signatures.
+	Zero                   *YesNo   `arg:"zero"`                   // Zero the first 4KiB of data in the new LV.
+	Tags                   []string `arg:"addtag"`                 // Tags to add to the LV.
+	Alloc                  string   `arg:"alloc"`                  // Allocation policy for Physical Extents.
+	SetAutoActivation      *YesNo   `arg:"setautoactivation"`      // Enable autoactivation for the LV.
+	IgnoreMonitoring       bool     `arg:"ignoremonitoring"`       // Ignore dmeventd monitoring.
+	NoUdevSync             bool     `arg:"noudevsync"`             // Ignore udev notifications.
+	Monitor                *YesNo   `arg:"monitor"`                // Toggle monitoring by dmeventd.
+	NoSync                 bool     `arg:"nosync"`                 // Skips initial sync for mirror, raid*; useful for empty volumes.
+	Type                   string   `arg:"type"`                   // Type of LV to create.
+	Size                   string   `arg:"size"`                   // Size of the LV.
+	Extents                string   `arg:"extents"`                // Size of the LV in logical extents.
+	Stripes                *int     `arg:"stripes"`                // Number of stripes in a striped LV.
+	StripeSize             string   `arg:"stripesize"`             // Amount of data that is written to one device before moving to the next.
+	MirrorLog              string   `arg:"mirrorlog"`              // The type of mirror log for mirrored LVs.
+	Mirrors                *int     `arg:"mirrors"`                // Number of mirror images in addition to the original LV image.
+	RegionSize             string   `arg:"regionsize"`             // Size of each raid or mirror synchronization region.
+	MinRecoveryRate        string   `arg:"minrecoveryrate"`        // Minimum recovery rate for a RAID LV.
+	MaxRecoveryRate        string   `arg:"maxrecoveryrate"`        // Maximum recovery rate for a RAID LV.
+	RAIDIntegrity          *YesNo   `arg:"raidintegrity"`          // Enable or disable data integrity checksums.
+	RAIDIntegrityMode      string   `arg:"raidintegritymode"`      // Chooses between using a journal (default) or bitmap for integrity checksums.
+	RAIDIntegrityBlockSize *int     `arg:"raidintegrityblocksize"` // Defines block size for dm-integrity on raid images.
+	Snapshot               bool     `arg:"snapshot"`               // Create a snapshot.
+	ChunkSize              string   `arg:"chunksize"`              // Size of chunks in a snapshot, cache pool or thin pool.
+	VirtualSize            string   `arg:"virtualsize"`            // Virtual size of a new thin LV.
+	Thin                   bool     `arg:"thin"`                   // Create a thin LV.
+	ThinPool               string   `arg:"thinpool"`               // Name of the thin pool LV.
+	Discards               string   `arg:"discards"`               // How the device-mapper thin pool layer in the kernel should handle discards.
+	ErrorWhenFull          *YesNo   `arg:"errorwhenfull"`          // Whether to fail when the thin pool is full.
+	PoolMetadataSize       string   `arg:"poolmetadatasize"`       // Specifies the size of the new pool metadata LV.
+	PoolMetadataSpare      *YesNo   `arg:"poolmetadataspare"`      // Toggles the automtic creation and management of a spare pool metadata LV in the VG.
+	Cache                  bool     `arg:"cache"`                  // Specifies the command is handling a cache LV or cache pool.
+	CacheDevice            string   `arg:"cachedevice"`            // The PV to use for the cache.
+	CacheVol               string   `arg:"cachevol"`               // The name of the cache LV.
+	CacheMode              string   `arg:"cachemode"`              // When writes to a cache LV should be considered complete.
+	CachePolicy            string   `arg:"cachepolicy"`            // The cache policy to use.
+	CachePool              string   `arg:"cachepool"`              // The name of a cache pool.
+	CacheSettings          []string `arg:"cachesettings"`          // Cache settings in `key=value` format.
+	CacheSize              string   `arg:"cachesize"`              // Size of the cache LV.
+	VDO                    bool     `arg:"vdo"`                    // Specifies the command is handling a VDO LV.
+	VDOPool                string   `arg:"vdopool"`                // The name of the VDO pool LV.
+	VDOSettings            []string `arg:"vdosettings"`            // VDO settings in `key=value` format.
+	Compression            *YesNo   `arg:"compression"`            // Whether to enable compression.
+	Deduplication          *YesNo   `arg:"deduplication"`          // Whether to enable deduplication.
 }
 
 // UpdateLVOptions provides options for modifying LVs (lvchange).
 type UpdateLVOptions struct {
 	CommonOptions
-	Name                 string   `arg:"0"`                      // Name of the LV to modify.
-	Force                bool     `arg:"--force"`                // Override checks and protections.
-	Select               string   `arg:"--select"`               // Filters objects based on criteria.
-	Refresh              bool     `arg:"--refresh"`              // Refreshes the LV metadata.
-	Activate             *YesNo   `arg:"--activate"`             // Activate the LV.
-	AutoBackup           *YesNo   `arg:"--autobackup"`           // Auto backup metadata after changes.
-	Contiguous           *YesNo   `arg:"--contiguous"`           // Allocate physical extents next to each other.
-	Persistent           *YesNo   `arg:"--persistent"`           // Make the specified block device minor number persistent.
-	Major                *int     `arg:"--major"`                // Major number of the LV block device.
-	Minor                *int     `arg:"--minor"`                // Minor number of the LV block device.
-	SetActivationSkip    *YesNo   `arg:"--setactivationskip"`    // Set the "activation skip" flag.
-	IgnoreActivationSkip bool     `arg:"--ignoreactivationskip"` // Ignore the "activation skip" flag.
-	Permission           string   `arg:"--permission"`           // Access permission, either read only `r` or read and write `rw`.
-	ReadAhead            string   `arg:"--readahead"`            // Read-ahead sector count.
-	Zero                 *YesNo   `arg:"--zero"`                 // Set zeroing mode for thin pool.
-	AddTags              []string `arg:"--addtag"`               // Add tag/s to the LV.
-	DelTags              []string `arg:"--deltag"`               // Remove tag/s from the LV.
-	Alloc                string   `arg:"--alloc"`                // Allocation policy for Physical Extents.
-	DetachProfile        bool     `arg:"--detachprofile"`        // Detach a metadata profile.
-	Partial              bool     `arg:"--partial"`              // Attempt activation with missing Physical Extents.
-	ActivationMode       string   `arg:"--activationmode"`       // Conditions under which a LV can be activated with missing PVs.
-	SetAutoActivation    *YesNo   `arg:"--setautoactivation"`    // Enable autoactivation for the LV.
-	Poll                 *YesNo   `arg:"--poll"`                 // Resume background operations that were halted due to disruptions.
-	IgnoreMonitoring     bool     `arg:"--ignoremonitoring"`     // Ignore dmeventd monitoring.
-	NoUdevSync           bool     `arg:"--noudevsync"`           // Ignore udev notifications.
-	Monitor              *YesNo   `arg:"--monitor"`              // Toggle monitoring by dmeventd.
-	Resync               bool     `arg:"--resync"`               // Initiate mirror synchronization.
-	MinRecoveryRate      string   `arg:"--minrecoveryrate"`      // Minimum recovery rate for a RAID LV.
-	MaxRecoveryRate      string   `arg:"--maxrecoveryrate"`      // Maximum recovery rate for a RAID LV.
-	WriteBehind          *int     `arg:"--writebehind"`          // Maximum number of outstanding writes that are allowed to devices in a RAID1 LV that is marked write-mostly.
-	WriteMostly          []string `arg:"--writemostly"`          // Mark a device in a RAID1 LV as write-mostly.
-	Rebuild              string   `arg:"--rebuild"`              // Selects a PV to rebuild in a raid LV.
-	SyncAction           string   `arg:"--syncaction"`           // Initiate different types of RAID synchronization.
-	Discards             string   `arg:"--discards"`             // How the device-mapper thin pool layer in the kernel should handle discards.
-	ErrorWhenFull        *YesNo   `arg:"--errorwhenfull"`        // Whether to fail when the thin pool is full.
-	CacheMode            string   `arg:"--cachemode"`            // When writes to a cache LV should be considered complete.
-	CachePolicy          string   `arg:"--cachepolicy"`          // The cache policy to use.
-	CacheSettings        string   `arg:"--cachesettings"`        // Cache settings in `key=value` format.
-	Compression          *YesNo   `arg:"--compression"`          // Whether to enable compression.
-	Deduplication        *YesNo   `arg:"--deduplication"`        // Whether to enable deduplication.
-	VDOSettings          string   `arg:"--vdosettings"`          // VDO settings in `key=value` format.
-	SysInit              bool     `arg:"--sysinit"`              // Indicates that the command is being invoked from early system init scripts.
-	IgnoreLockingFailure bool     `arg:"--ignorelockingfailure"` // Whether to proceed in read-only mode after lock failures.
-	ReadOnly             bool     `arg:"--readonly"`             // Read metadata without locks.
+	Name                 string   `arg:"0"`                    // Name of the LV to modify.
+	Force                bool     `arg:"force"`                // Override checks and protections.
+	Select               string   `arg:"select"`               // Filters objects based on criteria.
+	Refresh              bool     `arg:"refresh"`              // Refreshes the LV metadata.
+	Activate             *YesNo   `arg:"activate"`             // Activate the LV.
+	AutoBackup           *YesNo   `arg:"autobackup"`           // Auto backup metadata after changes.
+	Contiguous           *YesNo   `arg:"contiguous"`           // Allocate physical extents next to each other.
+	Persistent           *YesNo   `arg:"persistent"`           // Make the specified block device minor number persistent.
+	Major                *int     `arg:"major"`                // Major number of the LV block device.
+	Minor                *int     `arg:"minor"`                // Minor number of the LV block device.
+	SetActivationSkip    *YesNo   `arg:"setactivationskip"`    // Set the "activation skip" flag.
+	IgnoreActivationSkip bool     `arg:"ignoreactivationskip"` // Ignore the "activation skip" flag.
+	Permission           string   `arg:"permission"`           // Access permission, either read only `r` or read and write `rw`.
+	ReadAhead            string   `arg:"readahead"`            // Read-ahead sector count.
+	Zero                 *YesNo   `arg:"zero"`                 // Set zeroing mode for thin pool.
+	AddTags              []string `arg:"addtag"`               // Add tag/s to the LV.
+	DelTags              []string `arg:"deltag"`               // Remove tag/s from the LV.
+	Alloc                string   `arg:"alloc"`                // Allocation policy for Physical Extents.
+	DetachProfile        bool     `arg:"detachprofile"`        // Detach a metadata profile.
+	Partial              bool     `arg:"partial"`              // Attempt activation with missing Physical Extents.
+	ActivationMode       string   `arg:"activationmode"`       // Conditions under which a LV can be activated with missing PVs.
+	SetAutoActivation    *YesNo   `arg:"setautoactivation"`    // Enable autoactivation for the LV.
+	Poll                 *YesNo   `arg:"poll"`                 // Resume background operations that were halted due to disruptions.
+	IgnoreMonitoring     bool     `arg:"ignoremonitoring"`     // Ignore dmeventd monitoring.
+	NoUdevSync           bool     `arg:"noudevsync"`           // Ignore udev notifications.
+	Monitor              *YesNo   `arg:"monitor"`              // Toggle monitoring by dmeventd.
+	Resync               bool     `arg:"resync"`               // Initiate mirror synchronization.
+	MinRecoveryRate      string   `arg:"minrecoveryrate"`      // Minimum recovery rate for a RAID LV.
+	MaxRecoveryRate      string   `arg:"maxrecoveryrate"`      // Maximum recovery rate for a RAID LV.
+	WriteBehind          *int     `arg:"writebehind"`          // Maximum number of outstanding writes that are allowed to devices in a RAID1 LV that is marked write-mostly.
+	WriteMostly          []string `arg:"writemostly"`          // Mark a device in a RAID1 LV as write-mostly.
+	Rebuild              string   `arg:"rebuild"`              // Selects a PV to rebuild in a raid LV.
+	SyncAction           string   `arg:"syncaction"`           // Initiate different types of RAID synchronization.
+	Discards             string   `arg:"discards"`             // How the device-mapper thin pool layer in the kernel should handle discards.
+	ErrorWhenFull        *YesNo   `arg:"errorwhenfull"`        // Whether to fail when the thin pool is full.
+	CacheMode            string   `arg:"cachemode"`            // When writes to a cache LV should be considered complete.
+	CachePolicy          string   `arg:"cachepolicy"`          // The cache policy to use.
+	CacheSettings        string   `arg:"cachesettings"`        // Cache settings in `key=value` format.
+	Compression          *YesNo   `arg:"compression"`          // Whether to enable compression.
+	Deduplication        *YesNo   `arg:"deduplication"`        // Whether to enable deduplication.
+	VDOSettings          string   `arg:"vdosettings"`          // VDO settings in `key=value` format.
+	SysInit              bool     `arg:"sysinit"`              // Indicates that the command is being invoked from early system init scripts.
+	IgnoreLockingFailure bool     `arg:"ignorelockingfailure"` // Whether to proceed in read-only mode after lock failures.
+	ReadOnly             bool     `arg:"readonly"`             // Read metadata without locks.
 }
 
 // RemoveLVOptions provides options for removing LVs (lvremove).
 type RemoveLVOptions struct {
 	CommonOptions
-	Name       string `arg:"0"`            // Name of the LV to remove.
-	AutoBackup *YesNo `arg:"--autobackup"` // Auto backup metadata after changes.
-	Force      bool   `arg:"--force"`      // Override checks and protections.
-	Select     string `arg:"--select"`     // Filters objects based on criteria.
-	NoHistory  bool   `arg:"--nohistory"`  // Do not record history of LV being removed.
-	NoUdevSync bool   `arg:"--noudevsync"` // Ignore udev notifications.
+	Name       string `arg:"0"`          // Name of the LV to remove.
+	AutoBackup *YesNo `arg:"autobackup"` // Auto backup metadata after changes.
+	Force      bool   `arg:"force"`      // Override checks and protections.
+	Select     string `arg:"select"`     // Filters objects based on criteria.
+	NoHistory  bool   `arg:"nohistory"`  // Do not record history of LV being removed.
+	NoUdevSync bool   `arg:"noudevsync"` // Ignore udev notifications.
 }
 
 // ConvertLVLayoutOptions provides options for changing LV layouts (lvconvert).
 type ConvertLVLayoutOptions struct {
 	CommonOptions
-	Name                   string   `arg:"0"`                        // Name of the LV to convert.
-	NewName                string   `arg:"--name"`                   // The name of the new LV. When unspecified one is generated.
-	PVNames                []string `arg:"1"`                        // Specific PVs to convert.
-	Background             bool     `arg:"--background"`             // Run conversion in background.
-	Interval               *int     `arg:"--interval"`               // Report progress at regular intervals.
-	StartPoll              bool     `arg:"--startpoll"`              // Start polling an LV to continue processing a conversion.
-	Force                  bool     `arg:"--force"`                  // Override checks and protections.
-	UsePolicies            bool     `arg:"--usepolicies"`            // Use the policy configured in lvm.conf or a profile.
-	Stripes                *int     `arg:"--stripes"`                // Number of stripes in a striped LV.
-	StripeSize             string   `arg:"--stripesize"`             // Amount of data that is written to one device before moving to the next.
-	MirrorLog              string   `arg:"--mirrorlog"`              // The type of mirror log for mirrored LVs.
-	Mirrors                *int     `arg:"--mirrors"`                // Number of mirror images in addition to the original LV image.
-	RegionSize             string   `arg:"--regionsize"`             // Size of each raid or mirror synchronization region.
-	Alloc                  string   `arg:"--alloc"`                  // Allocation policy for Physical Extents.
-	NoUdevSync             bool     `arg:"--noudevsync"`             // Ignore udev notifications.
-	Type                   string   `arg:"--type"`                   // Type of LV to convert to.
-	ReadAhead              string   `arg:"--readahead"`              // Read-ahead sector count.
-	Zero                   *YesNo   `arg:"--zero"`                   // For snapshots, zero the first 4KiB (unless read-only); for thin pools, zero newly provisioned blocks.
-	RAIDIntegrity          *YesNo   `arg:"--raidintegrity"`          // Enable or disable data integrity checksums.
-	RAIDIntegrityMode      string   `arg:"--raidintegritymode"`      // Chooses between using a journal (default) or bitmap for integrity checksums.
-	RAIDIntegrityBlockSize *int     `arg:"--raidintegrityblocksize"` // Defines block size for dm-integrity on raid images.
-	Snapshot               bool     `arg:"--snapshot"`               // Combine a former COW snapshot LV with a former origin LV.
-	ChunkSize              string   `arg:"--chunksize"`              // Size of chunks in a snapshot, cache pool or thin pool.
-	VirtualSize            string   `arg:"--virtualsize"`            // Virtual size of a new thin LV.
-	Thin                   bool     `arg:"--thin"`                   // Create a thin LV.
-	ThinPool               string   `arg:"--thinpool"`               // Name of the thin pool LV.
-	Discards               string   `arg:"--discards"`               // How the device-mapper thin pool layer in the kernel should handle discards.
-	ErrorWhenFull          *YesNo   `arg:"--errorwhenfull"`          // Whether to fail when the thin pool is full.
-	OriginName             string   `arg:"--originname"`             // Specifies the name to use for the external origin LV when converting an LV to a thin LV.
-	PoolMetadata           string   `arg:"--poolmetadata"`           // The name of a an LV to use for storing pool metadata.
-	PoolMetadataSize       string   `arg:"--poolmetadatasize"`       // Specifies the size of the new pool metadata LV.
-	PoolMetadataSpare      *YesNo   `arg:"--poolmetadataspare"`      // Toggles the automtic creation and management of a spare pool metadata LV in the VG.
-	SwapMetadata           bool     `arg:"--swapmetadata"`           // Extracts the metadata LV from a pool and replaces it with another specified LV.
-	Cache                  bool     `arg:"--cache"`                  // Specifies the command is handling a cache LV or cache pool.
-	CacheDevice            string   `arg:"--cachedevice"`            // The PV to use for the cache.
-	CacheVol               string   `arg:"--cachevol"`               // The name of the cache LV.
-	CacheMode              string   `arg:"--cachemode"`              // When writes to a cache LV should be considered complete.
-	CachePolicy            string   `arg:"--cachepolicy"`            // The cache policy to use.
-	CachePool              string   `arg:"--cachepool"`              // The name of a cache pool.
-	CacheSettings          []string `arg:"--cachesettings"`          // Cache settings in `key=value` format.
-	CacheSize              string   `arg:"--cachesize"`              // Size of the cache LV.
-	VDOPool                string   `arg:"--vdopool"`                // The name of the VDO pool LV.
-	VDOSettings            []string `arg:"--vdosettings"`            // VDO settings in `key=value` format.
-	Compression            *YesNo   `arg:"--compression"`            // Whether to enable compression.
-	Deduplication          *YesNo   `arg:"--deduplication"`          // Whether to enable deduplication.
-	Merge                  bool     `arg:"--merge"`                  // An alias for MergeMirrors, MergeSnapshot, or MergeThin depending on LV type.
-	MergeMirrors           bool     `arg:"--mergemirrors"`           // Merge LV images that were split from a raid1 LV.
-	MergeSnapshot          bool     `arg:"-mergesnapshot"`           // Merge COW snapshot LV into its origin.
-	MergeThin              bool     `arg:"--mergethin"`              // Merge thin LV into its origin LV.
-	SplitCache             bool     `arg:"--splitcache"`             // Separates a cache pool from a cache LV, and keeps the unused cache pool LV.
-	SplitMirrors           *int     `arg:"--splitmirrors"`           // Splits the specified number of images from a raid1 or mirror LV and uses them to create a new LV.
-	SplitSnapshot          bool     `arg:"--splitsnapshot"`          // Separates a COW snapshot from its origin LV.
-	Uncache                bool     `arg:"--uncache"`                // Separates a cache pool from a cache LV, and deletes the unused cache pool LV.
-	TrackChanges           bool     `arg:"--trackchanges"`           // Tracks changes to a raid1 LV while the split images remain detached.
-	Repair                 bool     `arg:"--repair"`                 // Replace failed PVs in a raid or mirror LV, or run a repair utility on a thin pool.
-	Replace                string   `arg:"--replace"`                // Replace a specific PV in a raid LV with another PV.
+	Name                   string   `arg:"0"`                      // Name of the LV to convert.
+	NewName                string   `arg:"name"`                   // The name of the new LV. When unspecified one is generated.
+	PVNames                []string `arg:"1"`                      // Specific PVs to convert.
+	Background             bool     `arg:"background"`             // Run conversion in background.
+	Interval               *int     `arg:"interval"`               // Report progress at regular intervals.
+	StartPoll              bool     `arg:"startpoll"`              // Start polling an LV to continue processing a conversion.
+	Force                  bool     `arg:"force"`                  // Override checks and protections.
+	UsePolicies            bool     `arg:"usepolicies"`            // Use the policy configured in lvm.conf or a profile.
+	Stripes                *int     `arg:"stripes"`                // Number of stripes in a striped LV.
+	StripeSize             string   `arg:"stripesize"`             // Amount of data that is written to one device before moving to the next.
+	MirrorLog              string   `arg:"mirrorlog"`              // The type of mirror log for mirrored LVs.
+	Mirrors                *int     `arg:"mirrors"`                // Number of mirror images in addition to the original LV image.
+	RegionSize             string   `arg:"regionsize"`             // Size of each raid or mirror synchronization region.
+	Alloc                  string   `arg:"alloc"`                  // Allocation policy for Physical Extents.
+	NoUdevSync             bool     `arg:"noudevsync"`             // Ignore udev notifications.
+	Type                   string   `arg:"type"`                   // Type of LV to convert to.
+	ReadAhead              string   `arg:"readahead"`              // Read-ahead sector count.
+	Zero                   *YesNo   `arg:"zero"`                   // For snapshots, zero the first 4KiB (unless read-only); for thin pools, zero newly provisioned blocks.
+	RAIDIntegrity          *YesNo   `arg:"raidintegrity"`          // Enable or disable data integrity checksums.
+	RAIDIntegrityMode      string   `arg:"raidintegritymode"`      // Chooses between using a journal (default) or bitmap for integrity checksums.
+	RAIDIntegrityBlockSize *int     `arg:"raidintegrityblocksize"` // Defines block size for dm-integrity on raid images.
+	Snapshot               bool     `arg:"snapshot"`               // Combine a former COW snapshot LV with a former origin LV.
+	ChunkSize              string   `arg:"chunksize"`              // Size of chunks in a snapshot, cache pool or thin pool.
+	VirtualSize            string   `arg:"virtualsize"`            // Virtual size of a new thin LV.
+	Thin                   bool     `arg:"thin"`                   // Create a thin LV.
+	ThinPool               string   `arg:"thinpool"`               // Name of the thin pool LV.
+	Discards               string   `arg:"discards"`               // How the device-mapper thin pool layer in the kernel should handle discards.
+	ErrorWhenFull          *YesNo   `arg:"errorwhenfull"`          // Whether to fail when the thin pool is full.
+	OriginName             string   `arg:"originname"`             // Specifies the name to use for the external origin LV when converting an LV to a thin LV.
+	PoolMetadata           string   `arg:"poolmetadata"`           // The name of a an LV to use for storing pool metadata.
+	PoolMetadataSize       string   `arg:"poolmetadatasize"`       // Specifies the size of the new pool metadata LV.
+	PoolMetadataSpare      *YesNo   `arg:"poolmetadataspare"`      // Toggles the automtic creation and management of a spare pool metadata LV in the VG.
+	SwapMetadata           bool     `arg:"swapmetadata"`           // Extracts the metadata LV from a pool and replaces it with another specified LV.
+	Cache                  bool     `arg:"cache"`                  // Specifies the command is handling a cache LV or cache pool.
+	CacheDevice            string   `arg:"cachedevice"`            // The PV to use for the cache.
+	CacheVol               string   `arg:"cachevol"`               // The name of the cache LV.
+	CacheMode              string   `arg:"cachemode"`              // When writes to a cache LV should be considered complete.
+	CachePolicy            string   `arg:"cachepolicy"`            // The cache policy to use.
+	CachePool              string   `arg:"cachepool"`              // The name of a cache pool.
+	CacheSettings          []string `arg:"cachesettings"`          // Cache settings in `key=value` format.
+	CacheSize              string   `arg:"cachesize"`              // Size of the cache LV.
+	VDOPool                string   `arg:"vdopool"`                // The name of the VDO pool LV.
+	VDOSettings            []string `arg:"vdosettings"`            // VDO settings in `key=value` format.
+	Compression            *YesNo   `arg:"compression"`            // Whether to enable compression.
+	Deduplication          *YesNo   `arg:"deduplication"`          // Whether to enable deduplication.
+	Merge                  bool     `arg:"merge"`                  // An alias for MergeMirrors, MergeSnapshot, or MergeThin depending on LV type.
+	MergeMirrors           bool     `arg:"mergemirrors"`           // Merge LV images that were split from a raid1 LV.
+	MergeSnapshot          bool     `arg:"-mergesnapshot"`         // Merge COW snapshot LV into its origin.
+	MergeThin              bool     `arg:"mergethin"`              // Merge thin LV into its origin LV.
+	SplitCache             bool     `arg:"splitcache"`             // Separates a cache pool from a cache LV, and keeps the unused cache pool LV.
+	SplitMirrors           *int     `arg:"splitmirrors"`           // Splits the specified number of images from a raid1 or mirror LV and uses them to create a new LV.
+	SplitSnapshot          bool     `arg:"splitsnapshot"`          // Separates a COW snapshot from its origin LV.
+	Uncache                bool     `arg:"uncache"`                // Separates a cache pool from a cache LV, and deletes the unused cache pool LV.
+	TrackChanges           bool     `arg:"trackchanges"`           // Tracks changes to a raid1 LV while the split images remain detached.
+	Repair                 bool     `arg:"repair"`                 // Replace failed PVs in a raid or mirror LV, or run a repair utility on a thin pool.
+	Replace                string   `arg:"replace"`                // Replace a specific PV in a raid LV with another PV.
 }
 
 // ExtendLVOptions provides options for adding space to an LV (lvextend).
 type ExtendLVOptions struct {
 	CommonOptions
-	Name             string   `arg:"0"`                  // Name of the LV to extend.
-	PVNames          []string `arg:"1"`                  // Specific PVs to extend onto.
-	AutoBackup       *YesNo   `arg:"--autobackup"`       // Auto backup metadata after changes.
-	Force            bool     `arg:"--force"`            // Override checks and protections.
-	Alloc            string   `arg:"--alloc"`            // Allocation policy for Physical Extents.
-	UsePolicies      bool     `arg:"--usepolicies"`      // Use the policy configured in lvm.conf or a profile.
-	Type             string   `arg:"--type"`             // Type of LV to extend to.
-	Size             string   `arg:"--size"`             // The new size of the LV.
-	Extents          string   `arg:"--extents"`          // The new size of the LV in logical extents.
-	Stripes          *int     `arg:"--stripes"`          // Number of stripes in a striped LV.
-	StripeSize       string   `arg:"--stripesize"`       // Amount of data that is written to one device before moving to the next.
-	PoolMetadataSize string   `arg:"--poolmetadatasize"` // The new size of the pool metadata LV.
-	NoSync           bool     `arg:"--nosync"`           // Skips initial sync for mirror, raid*; useful for empty volumes.
-	NoUdevSync       bool     `arg:"--noudevsync"`       // Ignore udev notifications.
-	ResizeFS         bool     `arg:"--resizefs"`         // Resize underlying filesystem together with the LV.
-	NoFsck           bool     `arg:"--nofsck"`           // Skip performing fsck before resizing the filesystem.
+	Name             string   `arg:"0"`                // Name of the LV to extend.
+	PVNames          []string `arg:"1"`                // Specific PVs to extend onto.
+	AutoBackup       *YesNo   `arg:"autobackup"`       // Auto backup metadata after changes.
+	Force            bool     `arg:"force"`            // Override checks and protections.
+	Alloc            string   `arg:"alloc"`            // Allocation policy for Physical Extents.
+	UsePolicies      bool     `arg:"usepolicies"`      // Use the policy configured in lvm.conf or a profile.
+	Type             string   `arg:"type"`             // Type of LV to extend to.
+	Size             string   `arg:"size"`             // The new size of the LV.
+	Extents          string   `arg:"extents"`          // The new size of the LV in logical extents.
+	Stripes          *int     `arg:"stripes"`          // Number of stripes in a striped LV.
+	StripeSize       string   `arg:"stripesize"`       // Amount of data that is written to one device before moving to the next.
+	PoolMetadataSize string   `arg:"poolmetadatasize"` // The new size of the pool metadata LV.
+	NoSync           bool     `arg:"nosync"`           // Skips initial sync for mirror, raid*; useful for empty volumes.
+	NoUdevSync       bool     `arg:"noudevsync"`       // Ignore udev notifications.
+	ResizeFS         bool     `arg:"resizefs"`         // Resize underlying filesystem together with the LV.
+	NoFsck           bool     `arg:"nofsck"`           // Skip performing fsck before resizing the filesystem.
 }
 
 // ReduceLVOptions provides options for reducing the size of an LV (lvreduce).
 type ReduceLVOptions struct {
 	CommonOptions
-	Name       string `arg:"0"`            // Name of the LV to reduce.
-	AutoBackup *YesNo `arg:"--autobackup"` // Auto backup metadata after changes.
-	Force      bool   `arg:"--force"`      // Override checks and protections.
-	NoUdevSync bool   `arg:"--noudevsync"` // Ignore udev notifications.
-	Size       string `arg:"--size"`       // The new size of the LV.
-	Extents    string `arg:"--extents"`    // The new size of the LV in logical extents.
-	ResizeFS   bool   `arg:"--resizefs"`   // Resize underlying filesystem together with the LV.
-	NoFsck     bool   `arg:"--nofsck"`     // Skip performing fsck before resizing the filesystem.
+	Name       string `arg:"0"`          // Name of the LV to reduce.
+	AutoBackup *YesNo `arg:"autobackup"` // Auto backup metadata after changes.
+	Force      bool   `arg:"force"`      // Override checks and protections.
+	NoUdevSync bool   `arg:"noudevsync"` // Ignore udev notifications.
+	Size       string `arg:"size"`       // The new size of the LV.
+	Extents    string `arg:"extents"`    // The new size of the LV in logical extents.
+	ResizeFS   bool   `arg:"resizefs"`   // Resize underlying filesystem together with the LV.
+	NoFsck     bool   `arg:"nofsck"`     // Skip performing fsck before resizing the filesystem.
 }
 
 // RenameLVOptions provides options for renaming LVs (lvrename).
 type RenameLVOptions struct {
 	CommonOptions
-	From       string `arg:"0"`            // Name of the LV to rename.
-	To         string `arg:"1"`            // New name for the LV.
-	AutoBackup *YesNo `arg:"--autobackup"` // Auto backup metadata after changes.
-	NoUdevSync bool   `arg:"--noudevsync"` // Ignore udev notifications.
+	From       string `arg:"0"`          // Name of the LV to rename.
+	To         string `arg:"1"`          // New name for the LV.
+	AutoBackup *YesNo `arg:"autobackup"` // Auto backup metadata after changes.
+	NoUdevSync bool   `arg:"noudevsync"` // Ignore udev notifications.
 }
 
 // CommonOptions holds configurations for LVM2 commands.
 type CommonOptions struct {
-	Config      string   `arg:"--config"`      // Overrides lvm.conf settings.
-	NoLocking   bool     `arg:"--nolocking"`   // Disables locking.
-	LockOpt     string   `arg:"--lockopt"`     // Options for lvmlockd.
-	Profile     string   `arg:"--profile"`     // Command profile.
-	DevicesFile string   `arg:"--devicesfile"` // LVM device file (from /etc/lvm/devices/).
-	Devices     []string `arg:"--devices"`     // Overrides lvm.conf devices.
-	NoHints     bool     `arg:"--nohints"`     // Disables PV location hint.
-	Journal     string   `arg:"--journal"`     // Logs in systemd journal.
+	Config      string   `arg:"config"`      // Overrides lvm.conf settings.
+	NoLocking   bool     `arg:"nolocking"`   // Disables locking.
+	LockOpt     string   `arg:"lockopt"`     // Options for lvmlockd.
+	Profile     string   `arg:"profile"`     // Command profile.
+	DevicesFile string   `arg:"devicesfile"` // LVM device file (from /etc/lvm/devices/).
+	Devices     []string `arg:"devices"`     // Overrides lvm.conf devices.
+	NoHints     bool     `arg:"nohints"`     // Disables PV location hint.
+	Journal     string   `arg:"journal"`     // Logs in systemd journal.
 }

@@ -19,7 +19,9 @@ package lvm2_test
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
+	"math/big"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -158,8 +160,8 @@ func TestClient(t *testing.T) {
 
 		t.Log("Creating volume group")
 
-		vgName := strings.ReplaceAll(t.Name()+"_vg", "/", "_")
-		vgTag := strings.ReplaceAll(t.Name(), "/", "_")
+		vgName := uniqueName(strings.ReplaceAll(t.Name(), "/", "_"))
+		vgTag := uniqueName("tag-")
 
 		err = c.CreateVolumeGroup(ctx, lvm2.CreateVGOptions{
 			Name:    vgName,
@@ -214,7 +216,7 @@ func TestClient(t *testing.T) {
 
 		t.Log("Splitting volume group")
 
-		tmpSecondVGName := strings.ReplaceAll(t.Name()+"_tmp", "/", "_")
+		tmpSecondVGName := uniqueName(strings.ReplaceAll(t.Name(), "/", "_"))
 
 		err = c.MovePhysicalVolumes(ctx, lvm2.MovePVOptions{
 			Source:      vgName,
@@ -225,7 +227,7 @@ func TestClient(t *testing.T) {
 
 		t.Log("Renaming volume group")
 
-		secondVGName := strings.ReplaceAll(t.Name()+"_vg2", "/", "_")
+		secondVGName := uniqueName(strings.ReplaceAll(t.Name(), "/", "_"))
 
 		err = c.RenameVolumeGroup(ctx, lvm2.RenameVGOptions{
 			From: tmpSecondVGName,
@@ -329,7 +331,7 @@ func TestClient(t *testing.T) {
 
 		ctx := context.Background()
 
-		vgName := strings.ReplaceAll(t.Name()+"_vg", "/", "_")
+		vgName := uniqueName(strings.ReplaceAll(t.Name(), "/", "_"))
 
 		t.Log("Creating volume group", vgName)
 
@@ -347,7 +349,7 @@ func TestClient(t *testing.T) {
 			require.NoError(t, err)
 		})
 
-		lvName := strings.ReplaceAll(t.Name()+"_lv", "/", "_")
+		lvName := uniqueName(strings.ReplaceAll(t.Name(), "/", "_"))
 
 		t.Log("Creating logical volume", lvName)
 
@@ -515,4 +517,22 @@ func attachNBDDevice(imagePath string) (string, error) {
 func detachNBDDevice(devPath string) error {
 	cmd := exec.Command("qemu-nbd", "-d", devPath)
 	return cmd.Run()
+}
+
+func uniqueName(prefix string) string {
+	return prefix + "_" + randString(8)
+}
+
+func randString(n int) string {
+	const alphabet = "abcdefghijklmnopqrstuvwxyz0123456789"
+	b := make([]byte, n)
+	for i := range b {
+		bigIndex, err := rand.Int(rand.Reader, big.NewInt(int64(len(alphabet))))
+		if err != nil {
+			panic(err)
+		}
+
+		b[i] = alphabet[bigIndex.Int64()]
+	}
+	return string(b)
 }
